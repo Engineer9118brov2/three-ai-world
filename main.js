@@ -1,23 +1,27 @@
 import * as THREE from 'three';
 
-// --- Scene Setup ---
+// --- Scene Setup (Conductor Aesthetic) ---
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
 const globeGroup = new THREE.Group();
 scene.add(globeGroup);
 
+// --- The Globe (Minimalist Wireframe) ---
 const globe = new THREE.Mesh(
     new THREE.SphereGeometry(2, 64, 64),
     new THREE.MeshStandardMaterial({ 
         color: 0x000000, 
         wireframe: true, 
         emissive: 0xffffff, 
-        emissiveIntensity: 0.1 
+        emissiveIntensity: 0.05,
+        transparent: true,
+        opacity: 1
     })
 );
 globeGroup.add(globe);
@@ -67,6 +71,7 @@ function createArc(start, end) {
 }
 
 let currentDateIndex = 0;
+let currentFilter = "";
 
 function updateMarkers() {
     markers.clear();
@@ -74,9 +79,21 @@ function updateMarkers() {
     const dates = [...new Set(groundCenters.map(d => d.date))].sort();
     const date = dates[currentDateIndex] || dates[dates.length - 1];
     
+    // Update URL State
+    const url = new URL(window.location);
+    url.searchParams.set('date', currentDateIndex);
+    if (currentFilter) url.searchParams.set('q', currentFilter);
+    else url.searchParams.delete('q');
+    window.history.replaceState({}, '', url);
+
     let totalPower = 0;
     groundCenters.forEach(dc => {
-        if (dc.date <= date) {
+        const matchesFilter = !currentFilter || 
+            dc.name.toLowerCase().includes(currentFilter.toLowerCase()) || 
+            dc.hardware.toLowerCase().includes(currentFilter.toLowerCase()) ||
+            dc.company.toLowerCase().includes(currentFilter.toLowerCase());
+
+        if (dc.date <= date && matchesFilter) {
             totalPower += dc.power || 0;
             let pos;
             if (dc.isSpace) {
@@ -87,43 +104,80 @@ function updateMarkers() {
                     arcs.add(createArc({ lat: dc.lat, lon: dc.lon }, nvidiaHQ));
                 }
             }
-            const marker = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+            const marker = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
             marker.position.copy(pos);
             markers.add(marker);
         }
     });
     
     document.getElementById('total-power').innerText = `${totalPower} MW`;
+    document.getElementById('gpu-count').innerText = Math.round((totalPower * 1000000) / 700).toLocaleString();
     
-    // Update Info Panel with Stock Price
     const activeDC = groundCenters.find(d => d.date === date);
     if (activeDC) {
         document.getElementById('info-panel').innerHTML = `
-            <div style="border-bottom: 1px solid #fff; padding-bottom: 5px; margin-bottom: 10px;">[${activeDC.name}]</div>
+            <div style="border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 12px; font-weight: 600;">[${activeDC.name}]</div>
             COMPANY: ${activeDC.company}<br>
-            STOCK PRICE: <span style="color: #00ff00;">${activeDC.price}</span><br>
-            POWER: ${activeDC.power} MW<br>
-            HARDWARE: ${activeDC.hardware}<br>
+            STOCK: <span style="color: #00ff00;">${activeDC.price}</span><br>
+            LOAD: ${activeDC.power} MW<br>
+            HW: ${activeDC.hardware}<br>
             <br>
-            <div style="font-size: 9px; opacity: 0.5;">DEBT DEPENDENCY: NVIDIA</div>
+            <div style="font-size: 9px; opacity: 0.4;">DEPENDENCY: NVIDIA_CORP</div>
         `;
     }
 }
 
 window.updateTimeline = (val) => {
     currentDateIndex = parseInt(val);
-    updateMarkers();
     const dates = [...new Set(groundCenters.map(d => d.date))].sort();
     document.getElementById('date-label').innerText = dates[currentDateIndex];
+    updateMarkers();
 };
 
-scene.add(new THREE.AmbientLight(0x888888));
+window.handleSearch = (val) => {
+    currentFilter = val;
+    updateMarkers();
+};
+
+// --- Camera & Interaction ---
+scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 camera.position.z = 6;
+
+let isRotating = false;
+window.addEventListener('mousedown', () => isRotating = true);
+window.addEventListener('mouseup', () => isRotating = false);
+window.addEventListener('mousemove', (e) => {
+    if (isRotating) {
+        globeGroup.rotation.y += e.movementX * 0.005;
+        globeGroup.rotation.x += e.movementY * 0.005;
+    }
+});
+
+window.addEventListener('wheel', (e) => {
+    camera.position.z = Math.max(3, Math.min(camera.position.z + e.deltaY * 0.01, 100));
+    const spaceOpacity = Math.max(0, Math.min((camera.position.z - 15) / 15, 1));
+    document.getElementById('space-alert').style.opacity = spaceOpacity;
+    globe.material.opacity = 1 - spaceOpacity;
+});
 
 function animate() {
     requestAnimationFrame(animate);
-    globeGroup.rotation.y += 0.001;
+    if (!isRotating) globeGroup.rotation.y += 0.001;
     renderer.render(scene, camera);
 }
 animate();
-updateTimeline(0);
+
+// --- Initialization ---
+const params = new URLSearchParams(window.location.search);
+if (params.has('date')) {
+    const d = parseInt(params.get('date'));
+    document.querySelector('input[type=range]').value = d;
+    updateTimeline(d);
+} else {
+    updateTimeline(0);
+}
+if (params.has('q')) {
+    const q = params.get('q');
+    document.querySelector('#search-bar input').value = q;
+    handleSearch(q);
+}
