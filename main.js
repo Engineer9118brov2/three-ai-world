@@ -8,6 +8,19 @@ const searchInput = document.getElementById('search-centers');
 const statSites = document.getElementById('stat-sites');
 const statPower = document.getElementById('stat-power');
 const statOperational = document.getElementById('stat-operational');
+const bubbleSummary = document.getElementById('bubble-summary');
+const bubbleGrid = document.getElementById('bubble-grid');
+const rateShockInput = document.getElementById('rate-shock');
+const utilizationInput = document.getElementById('utilization');
+const powerInflationInput = document.getElementById('power-inflation');
+const revenueGrowthInput = document.getElementById('revenue-growth');
+const rateShockVal = document.getElementById('rate-shock-val');
+const utilizationVal = document.getElementById('utilization-val');
+const powerInflationVal = document.getElementById('power-inflation-val');
+const revenueGrowthVal = document.getElementById('revenue-growth-val');
+const bubbleBaseBtn = document.getElementById('bubble-base');
+const bubbleStressBtn = document.getElementById('bubble-stress');
+const bubbleResetBtn = document.getElementById('bubble-reset');
 
 let renderer;
 try {
@@ -141,6 +154,20 @@ const OPERATOR_LINKS = {
     { label: 'NVIDIA Data Center', url: 'https://www.nvidia.com/en-us/data-center/' },
     { label: 'NVIDIA Sustainability', url: 'https://www.nvidia.com/en-us/about-nvidia/corporate-responsibility/' }
   ]
+};
+
+const BUBBLE_OPERATORS = {
+  AWS: { debtB: 67, capexB: 54, revenueB: 107, ebitdaMargin: 0.38, baseRate: 4.5, aiShare: 0.24 },
+  AZURE: { debtB: 80, capexB: 58, revenueB: 130, ebitdaMargin: 0.42, baseRate: 4.2, aiShare: 0.22 },
+  GOOGLE: { debtB: 30, capexB: 52, revenueB: 101, ebitdaMargin: 0.36, baseRate: 4.1, aiShare: 0.2 },
+  META: { debtB: 50, capexB: 45, revenueB: 68, ebitdaMargin: 0.34, baseRate: 4.7, aiShare: 0.3 },
+  ORACLE: { debtB: 92, capexB: 24, revenueB: 53, ebitdaMargin: 0.31, baseRate: 5.2, aiShare: 0.19 },
+  IBM: { debtB: 57, capexB: 14, revenueB: 31, ebitdaMargin: 0.24, baseRate: 5.4, aiShare: 0.12 },
+  COREWEAVE: { debtB: 21, capexB: 13, revenueB: 4.8, ebitdaMargin: 0.18, baseRate: 8.5, aiShare: 0.72 },
+  COLOCATION: { debtB: 120, capexB: 28, revenueB: 39, ebitdaMargin: 0.29, baseRate: 6.1, aiShare: 0.28 },
+  NVIDIA: { debtB: 14, capexB: 9, revenueB: 80, ebitdaMargin: 0.52, baseRate: 3.8, aiShare: 0.64 },
+  XAI: { debtB: 12, capexB: 11, revenueB: 1.5, ebitdaMargin: 0.08, baseRate: 9.2, aiShare: 0.9 },
+  CHINA: { debtB: 210, capexB: 78, revenueB: 95, ebitdaMargin: 0.2, baseRate: 5.0, aiShare: 0.34 }
 };
 
 const DATA_CENTERS = [
@@ -340,6 +367,127 @@ function centerDetailsHtml(center) {
   ].join('');
 }
 
+function riskBand(score) {
+  if (score >= 68) return { label: 'HIGH', className: 'risk-high' };
+  if (score >= 42) return { label: 'MEDIUM', className: 'risk-med' };
+  return { label: 'LOW', className: 'risk-low' };
+}
+
+function simulateOperator(operator, params) {
+  const base = BUBBLE_OPERATORS[operator];
+  if (!base) return null;
+
+  const utilFactor = params.utilization / 78;
+  const revenue = base.revenueB * (1 + params.revenueGrowth / 100) * (0.78 + utilFactor * 0.22);
+  const aiRevenue = revenue * base.aiShare * utilFactor;
+
+  const powerOpex = base.capexB * 0.11 * (1 + params.powerInflation / 100) * (0.86 + utilFactor * 0.14);
+  const operatingProfit = revenue * base.ebitdaMargin - powerOpex;
+  const interestRate = base.baseRate + params.rateShock;
+  const interestCost = base.debtB * (interestRate / 100);
+  const maintenanceCapex = base.capexB * 0.36;
+  const freeCash = operatingProfit - interestCost - maintenanceCapex;
+
+  const debtToOp = base.debtB / Math.max(operatingProfit, 0.1);
+  const coverage = operatingProfit / Math.max(interestCost, 0.1);
+  const capexRatio = base.capexB / Math.max(revenue, 0.1);
+
+  const score = Math.max(
+    0,
+    Math.min(
+      100,
+      debtToOp * 10 +
+        Math.max(0, 3 - coverage) * 14 +
+        Math.max(0, capexRatio - 0.25) * 120 +
+        Math.max(0, -freeCash / 8) * 10 +
+        Math.max(0, 0.75 - utilFactor) * 50
+    )
+  );
+
+  return {
+    operator,
+    revenue,
+    aiRevenue,
+    operatingProfit,
+    freeCash,
+    debtToOp,
+    coverage,
+    capexRatio,
+    score,
+    risk: riskBand(score)
+  };
+}
+
+function currentBubbleParams() {
+  return {
+    rateShock: Number.parseFloat(rateShockInput.value),
+    utilization: Number.parseFloat(utilizationInput.value),
+    powerInflation: Number.parseFloat(powerInflationInput.value),
+    revenueGrowth: Number.parseFloat(revenueGrowthInput.value)
+  };
+}
+
+function formatB(value) {
+  return `${value >= 0 ? '+' : ''}${value.toFixed(1)}B`;
+}
+
+function updateBubbleLab() {
+  const params = currentBubbleParams();
+  rateShockVal.innerText = `${params.rateShock.toFixed(1)}%`;
+  utilizationVal.innerText = `${params.utilization.toFixed(0)}%`;
+  powerInflationVal.innerText = `${params.powerInflation.toFixed(0)}%`;
+  revenueGrowthVal.innerText = `${params.revenueGrowth.toFixed(0)}%`;
+
+  const results = Object.keys(BUBBLE_OPERATORS)
+    .map((operator) => simulateOperator(operator, params))
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score);
+
+  const marketBubble = results.reduce((sum, row) => sum + row.score, 0) / Math.max(results.length, 1);
+  const atRisk = results.filter((row) => row.score >= 68).length;
+  const chinaVsUs =
+    (results.find((row) => row.operator === 'CHINA')?.score ?? 0) -
+    (results.find((row) => row.operator === 'AWS')?.score ?? 0);
+  const globalRisk = riskBand(marketBubble);
+
+  bubbleSummary.innerHTML = [
+    `GLOBAL BUBBLE INDEX: <span class="${globalRisk.className}">${marketBubble.toFixed(1)} / 100 (${globalRisk.label})</span><br>`,
+    `OPERATORS IN HIGH-RISK ZONE: ${atRisk}/${results.length}<br>`,
+    `CHINA VS US STRESS SPREAD (CHINA-AWS): ${chinaVsUs >= 0 ? '+' : ''}${chinaVsUs.toFixed(1)}<br>`,
+    `THESIS: IF UTILIZATION DROPS WHILE RATES/POWER RISE, CASH BURN + DEBT ROLLOVER PRESSURE CAN FORCE A CAPEX RESET.`
+  ].join('');
+
+  bubbleGrid.innerHTML = `
+    <table id="bubble-table">
+      <thead>
+        <tr>
+          <th>Operator</th>
+          <th>Risk</th>
+          <th>Debt/Op</th>
+          <th>Int Cov</th>
+          <th>FCF</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${results
+          .map((row) => {
+            const active = row.operator === (DATA_CENTERS.find((center) => center.id === activeCenterId)?.operator ?? '');
+            return `
+              <tr style="${active ? 'background:#173226;' : ''}">
+                <td>${row.operator}</td>
+                <td class="${row.risk.className}">${row.score.toFixed(0)}</td>
+                <td>${row.debtToOp.toFixed(1)}x</td>
+                <td>${row.coverage.toFixed(1)}x</td>
+                <td>${formatB(row.freeCash)}</td>
+              </tr>
+            `;
+          })
+          .join('')}
+      </tbody>
+    </table>
+  `;
+}
+
 function selectCenter(center, focus = true) {
   activeCenterId = center.id;
   infoPanel.innerHTML = centerDetailsHtml(center);
@@ -357,6 +505,7 @@ function selectCenter(center, focus = true) {
   }
 
   renderCenterList(searchInput.value || '');
+  updateBubbleLab();
 }
 
 function renderCenterList(query = '') {
@@ -398,6 +547,34 @@ searchInput.addEventListener('input', () => {
   renderCenterList(searchInput.value || '');
 });
 
+[rateShockInput, utilizationInput, powerInflationInput, revenueGrowthInput].forEach((input) => {
+  input.addEventListener('input', updateBubbleLab);
+});
+
+bubbleBaseBtn.addEventListener('click', () => {
+  rateShockInput.value = '0.5';
+  utilizationInput.value = '82';
+  powerInflationInput.value = '8';
+  revenueGrowthInput.value = '18';
+  updateBubbleLab();
+});
+
+bubbleStressBtn.addEventListener('click', () => {
+  rateShockInput.value = '3.5';
+  utilizationInput.value = '61';
+  powerInflationInput.value = '37';
+  revenueGrowthInput.value = '2';
+  updateBubbleLab();
+});
+
+bubbleResetBtn.addEventListener('click', () => {
+  rateShockInput.value = '0';
+  utilizationInput.value = '78';
+  powerInflationInput.value = '0';
+  revenueGrowthInput.value = '12';
+  updateBubbleLab();
+});
+
 window.addEventListener('click', (event) => {
   if (performance.now() < suppressClickUntil) return;
   if (draggedSincePointerDown) return;
@@ -427,6 +604,7 @@ window.addEventListener('resize', () => {
 updateStats();
 renderCenterList('');
 selectCenter(DATA_CENTERS[0], false);
+updateBubbleLab();
 
 function animate() {
   requestAnimationFrame(animate);
