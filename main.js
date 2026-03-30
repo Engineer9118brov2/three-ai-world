@@ -14,20 +14,21 @@ const globeMaterial = new THREE.MeshStandardMaterial({
     color: 0x111111, 
     wireframe: true,
     emissive: 0x1133ff,
-    emissiveIntensity: 0.2
+    emissiveIntensity: 0.1
 });
 const globe = new THREE.Mesh(globeGeometry, globeMaterial);
 scene.add(globe);
 
-// --- Data Center Markers ---
-// Mock data for "New Data Centers"
+// --- REAL DATA CENTERS (2024-2026) ---
 const dataCenters = [
-    { name: "Ashburn-1", lat: 39.04, lon: -77.48, date: "2024-01" },
-    { name: "Dublin-A", lat: 53.34, lon: -6.26, date: "2024-03" },
-    { name: "Singapore-Cloud", lat: 1.35, lon: 103.81, date: "2024-06" },
-    { name: "Tokyo-AI", lat: 35.67, lon: 139.65, date: "2024-09" },
-    { name: "Dallas-GPU", lat: 32.77, lon: -96.79, date: "2025-01" },
-    { name: "Berlin-Deep", lat: 52.52, lon: 13.40, date: "2025-04" }
+    { name: "MSFT Fairwater (WI)", lat: 42.70, lon: -87.85, date: "2024-05", info: "Microsoft's 315-acre Blackwell cluster." },
+    { name: "Meta Hyperion (LA)", lat: 32.40, lon: -91.70, date: "2024-09", info: "Meta's $10B campus for Llama 4." },
+    { name: "Google Texas (TX)", lat: 35.20, lon: -101.80, date: "2024-12", info: "$40B TPU-focused AI supercomputer." },
+    { name: "MSFT Narvik (Norway)", lat: 68.40, lon: 17.40, date: "2025-03", info: "Hyperscale AI in the Arctic." },
+    { name: "AWS Mississippi (MS)", lat: 32.30, lon: -90.20, date: "2025-06", info: "$10B AWS Generative AI hub." },
+    { name: "xAI Colossus (TN)", lat: 35.15, lon: -90.05, date: "2025-08", info: "Elon Musk's 100k H100 GPU cluster." },
+    { name: "Nvidia Reliance (India)", lat: 19.07, lon: 72.87, date: "2025-11", info: "2,000 MW Sovereign AI project." },
+    { name: "Meta Indiana (IN)", lat: 40.05, lon: -86.45, date: "2026-02", info: "$10B Prometheus GPU cluster." }
 ];
 
 const markers = new THREE.Group();
@@ -48,37 +49,44 @@ function updateMarkers(currentDate) {
     dataCenters.forEach(dc => {
         if (dc.date <= currentDate) {
             const pos = latLonToVector3(dc.lat, dc.lon, 2.05);
-            const markerGeom = new THREE.SphereGeometry(0.05, 16, 16);
-            const markerMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            // Glowing Marker
+            const markerGeom = new THREE.SphereGeometry(0.06, 16, 16);
+            const markerMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc });
             const marker = new THREE.Mesh(markerGeom, markerMat);
             marker.position.copy(pos);
             markers.add(marker);
+            
+            // Spike to show scale (Visual Hype)
+            const spikeGeom = new THREE.CylinderGeometry(0.01, 0.04, 0.5);
+            const spikeMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc, transparent: true, opacity: 0.5 });
+            const spike = new THREE.Mesh(spikeGeom, spikeMat);
+            spike.position.copy(pos.clone().multiplyScalar(1.1));
+            spike.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pos.clone().normalize());
+            markers.add(spike);
         }
     });
 }
 
-// --- Lights & Camera ---
-const light = new THREE.PointLight(0xffffff, 2, 100);
-light.position.set(10, 10, 10);
-scene.add(light);
+// --- Lights & Interactivity ---
 scene.add(new THREE.AmbientLight(0x444444));
-camera.position.z = 5;
+const light = new THREE.DirectionalLight(0xffffff, 1);
+light.position.set(5, 3, 5);
+scene.add(light);
+camera.position.z = 6;
 
-// --- Animation Loop ---
 function animate() {
     requestAnimationFrame(animate);
-    globe.rotation.y += 0.002;
-    markers.rotation.y += 0.002;
+    globe.rotation.y += 0.001;
+    markers.rotation.y += 0.001;
     renderer.render(scene, camera);
 }
 animate();
 
-// --- Timeline UI Logic ---
 window.updateTimeline = (val) => {
-    const dateMap = ["2024-01", "2024-03", "2024-06", "2024-09", "2025-01", "2025-04"];
-    const date = dateMap[val];
+    const dates = dataCenters.map(d => d.date).sort();
+    const date = dates[val] || dates[dates.length - 1];
     document.getElementById('date-label').innerText = date;
     updateMarkers(date);
 };
 
-updateMarkers("2024-01");
+updateMarkers(dataCenters[0].date);
