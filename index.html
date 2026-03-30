@@ -21,7 +21,19 @@
         h1 { font-size: 16px; margin: 0; font-weight: 500; }
         .version { font-size: 9px; opacity: 0.4; margin-top: 4px; display: block; }
 
-        #info-panel { position: absolute; top: 24px; right: 24px; background: var(--surface); padding: 20px; border: 1px solid var(--border); width: 280px; z-index: 50; line-height: 1.6; min-height: 100px; }
+        #info-panel { position: absolute; top: 24px; right: 24px; background: var(--surface); padding: 16px; border: 1px solid var(--border); width: 360px; z-index: 50; line-height: 1.5; max-height: 76vh; overflow: auto; }
+        #catalog-panel { position: absolute; top: 106px; left: 24px; width: 360px; max-height: 62vh; overflow: auto; background: rgba(10,10,10,0.94); border: 1px solid var(--border); padding: 12px; z-index: 50; }
+        #stats-panel { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); background: rgba(10,10,10,0.9); border: 1px solid var(--border); padding: 10px 14px; z-index: 50; display: flex; gap: 16px; font-size: 10px; }
+        .stat { opacity: 0.9; }
+        .stat b { color: #8cf7c7; font-weight: 600; }
+        .panel-title { font-size: 10px; letter-spacing: 0.08em; opacity: 0.7; margin-bottom: 8px; }
+        #search-centers { width: 100%; box-sizing: border-box; background: #050505; color: #fff; border: 1px solid var(--border); padding: 8px; font: inherit; margin-bottom: 10px; }
+        .center-row { border: 1px solid var(--border); padding: 8px; margin-bottom: 8px; cursor: pointer; background: #070707; }
+        .center-row:hover { border-color: #7df0b5; background: #0e1a14; }
+        .center-name { font-size: 11px; margin-bottom: 4px; color: #d7ffe8; }
+        .center-meta { font-size: 9px; opacity: 0.72; line-height: 1.4; }
+        #info-panel a { color: #8fecc1; text-decoration: underline; }
+        .chip { display: inline-block; padding: 2px 6px; border: 1px solid #2b5; margin: 0 4px 4px 0; font-size: 9px; }
         
         #ctrl-btns { position: absolute; bottom: 24px; left: 24px; z-index: 50; display: flex; flex-direction: column; gap: 8px; }
         
@@ -36,8 +48,11 @@
 
         @media (max-width: 900px) {
             #header { top: 14px; left: 14px; padding-left: 10px; }
-            #info-panel { top: 14px; right: 14px; width: min(72vw, 280px); padding: 12px; font-size: 10px; min-height: 88px; }
-            #ctrl-btns { left: 14px; bottom: 14px; }
+            #stats-panel { top: 72px; left: 14px; transform: none; right: 14px; width: auto; justify-content: space-between; }
+            #catalog-panel { display: none; }
+            #info-panel { top: 126px; right: 14px; left: 14px; width: auto; padding: 12px; font-size: 10px; max-height: 48vh; }
+            #ctrl-btns { left: 14px; bottom: 14px; right: 14px; }
+            button { width: 100%; }
             #hint { display: none; }
             h1 { font-size: 14px; }
         }
@@ -46,11 +61,23 @@
 <body>
     <div id="header">
         <h1>AI NEXUS // CONDUCTOR</h1>
-        <span class="version">TERMINAL VER. 7.0 // ORBIT_PROTOCOL ACTIVE</span>
+        <span class="version">TERMINAL VER. 8.0 // GLOBAL INFRA INTEL ACTIVE</span>
+    </div>
+
+    <div id="stats-panel">
+        <div class="stat">SITES: <b id="stat-sites">0</b></div>
+        <div class="stat">EST. POWER: <b id="stat-power">0 MW</b></div>
+        <div class="stat">OPERATIONAL: <b id="stat-operational">0</b></div>
+    </div>
+
+    <div id="catalog-panel">
+        <div class="panel-title">GLOBAL AI DATA CENTER INDEX</div>
+        <input id="search-centers" placeholder="SEARCH REGION / OPERATOR / MODEL" />
+        <div id="center-list"></div>
     </div>
 
     <div id="info-panel">
-        [SYSTEM ONLINE]<br>CLICK A GLOBAL NODE TO INITIALIZE DATA STREAM.
+        [SYSTEM ONLINE]<br>SELECT A SITE FOR FULL IMPACT + MODEL BREAKDOWN.
     </div>
 
     <div id="ctrl-btns">
