@@ -13,10 +13,14 @@
             --accent: #00ff00;
             --danger: #ff0000;
             --font-mono: 'Geist Mono', 'Courier New', Courier, monospace;
+            --chart-capex: #7ef0c2;
+            --chart-debt: #ffbf7f;
+            --chart-bubble: #ff7676;
+            --deep-label-color: #97f5ca;
         }
 
         body { margin: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font-mono); text-transform: uppercase; font-size: 12px; letter-spacing: 0.05em; }
-        
+
         #header { position: absolute; top: 24px; left: 24px; border-left: 1px solid #fff; padding-left: 16px; z-index: 50; }
         h1 { font-size: 16px; margin: 0; font-weight: 500; }
         .version { font-size: 9px; opacity: 0.4; margin-top: 4px; display: block; }
@@ -36,8 +40,11 @@
         #timeline-speed { flex: 1; background: #070707; color: #fff; border: 1px solid var(--border); padding: 7px; font: inherit; font-size: 9px; }
         #timeline-chart { margin-top: 8px; border: 1px solid #273129; padding: 6px; background: #050505; }
         .timeline-legend { display: flex; gap: 8px; font-size: 8px; opacity: 0.75; margin-top: 4px; }
+        .timeline-legend span:nth-child(1)::before { content: '■ '; color: var(--chart-capex); }
+        .timeline-legend span:nth-child(2)::before { content: '■ '; color: var(--chart-debt); }
+        .timeline-legend span:nth-child(3)::before { content: '■ '; color: var(--chart-bubble); }
         #timeline-deepdive { margin-top: 8px; border: 1px solid #273129; background: #070707; padding: 8px; font-size: 9px; line-height: 1.45; }
-        .deep-label { color: #97f5ca; opacity: 0.9; }
+        .deep-label { color: var(--deep-label-color); opacity: 0.9; }
         #bubble-panel { position: absolute; bottom: 24px; right: 24px; width: 360px; max-height: 44vh; overflow: auto; background: rgba(8,8,8,0.95); border: 1px solid var(--border); padding: 12px; z-index: 50; }
         .bubble-control { margin-bottom: 8px; font-size: 9px; }
         .bubble-control label { display: flex; justify-content: space-between; margin-bottom: 4px; opacity: 0.85; }
@@ -61,12 +68,13 @@
         .center-meta { font-size: 9px; opacity: 0.72; line-height: 1.4; }
         #info-panel a { color: #8fecc1; text-decoration: underline; }
         .chip { display: inline-block; padding: 2px 6px; border: 1px solid #2b5; margin: 0 4px 4px 0; font-size: 9px; }
-        
+
         #ctrl-btns { position: absolute; bottom: 24px; left: 24px; z-index: 50; display: flex; flex-direction: column; gap: 8px; }
-        
+
         button { background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 12px 20px; cursor: pointer; font-family: inherit; font-size: 10px; transition: all 0.2s; text-align: left; }
         button:hover { border-color: #fff; background: #111; }
-        
+        button:disabled { opacity: 0.35; cursor: not-allowed; }
+
         #frontier-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 35; text-align: center; opacity: 0; pointer-events: none; transition: opacity 0.45s ease; }
         #frontier-overlay.show { opacity: 1; }
         .frontier-kicker { font-size: 11px; letter-spacing: 0.18em; color: #9bc8ff; opacity: 0.8; }
@@ -75,6 +83,51 @@
 
         #hint { position: absolute; bottom: 24px; right: 24px; font-size: 9px; opacity: 0.3; }
         canvas { display: block; }
+
+        /* ── STORY MODE ─────────────────────────────────────────────────── */
+        #story-overlay {
+            position: fixed; inset: 0; z-index: 80;
+            background: rgba(0,0,0,0.86);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.35s ease;
+        }
+        #story-overlay.show { opacity: 1; pointer-events: all; }
+        #story-card {
+            width: min(540px, 92vw);
+            background: #070f0a;
+            border: 1px solid #2a5a3a;
+            padding: 32px 36px;
+            position: relative;
+        }
+        #story-year { font-size: 52px; color: #9cf3cb; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+        #story-title { font-size: 11px; letter-spacing: 0.2em; color: #59c98a; margin-bottom: 14px; }
+        #story-headline { font-size: 18px; font-weight: 600; color: #e8fff4; margin-bottom: 14px; line-height: 1.3; letter-spacing: 0.04em; }
+        #story-text { font-size: 11px; line-height: 1.7; opacity: 0.88; margin-bottom: 18px; letter-spacing: 0.03em; }
+        #story-stat { font-size: 10px; color: #7ef0c2; border-left: 2px solid #3a7a55; padding-left: 10px; margin-bottom: 22px; }
+        #story-progress { display: flex; gap: 6px; margin-bottom: 20px; }
+        .story-dot { width: 8px; height: 8px; border-radius: 50%; background: #2a4a38; flex-shrink: 0; transition: background 0.2s; }
+        .story-dot.active { background: #7ef0c2; }
+        #story-nav { display: flex; gap: 8px; }
+        #story-nav button { flex: 1; padding: 10px 14px; font-size: 9px; }
+        #story-exit { position: absolute; top: 12px; right: 14px; padding: 6px 10px; font-size: 9px; opacity: 0.6; }
+        #story-exit:hover { opacity: 1; }
+        #story-play { background: #0d2019; border-color: #2a5a3a; }
+
+        /* ── SIMPLIFIED VIEW ─────────────────────────────────────────────── */
+        body.simplified #bubble-panel { display: none; }
+        body.simplified #timeline-deepdive { display: none; }
+        body.simplified #timeline-chart { display: none; }
+        body.simplified .timeline-legend { display: none; }
+        body.simplified #simplified-legend { display: block; }
+        body.simplified #hint { display: none; }
+        #simplified-legend {
+            display: none;
+            position: absolute; bottom: 24px; right: 24px;
+            background: rgba(8,8,8,0.95); border: 1px solid var(--border);
+            padding: 12px 16px; z-index: 50; font-size: 9px; line-height: 1.9;
+        }
+        .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 
         /* Scrollbar hide */
         ::-webkit-scrollbar { display: none; }
@@ -90,6 +143,9 @@
             button { width: 100%; }
             #hint { display: none; }
             h1 { font-size: 14px; }
+            #story-card { padding: 24px 20px; }
+            #story-year { font-size: 38px; }
+            #story-headline { font-size: 14px; }
         }
     </style>
 </head>
@@ -112,10 +168,14 @@
     </div>
 
     <div id="timeline-panel">
-        <div class="panel-title">TIMELINE // 2019-2030</div>
+        <div class="panel-title" id="timeline-panel-label">TIMELINE // 2019-2030</div>
         <div id="timeline-year">2019</div>
         <div id="timeline-phase">BOOTSTRAP PHASE</div>
-        <input id="timeline-slider" type="range" min="2019" max="2030" step="1" value="2019">
+        <input
+            id="timeline-slider"
+            type="range" min="2019" max="2030" step="1" value="2019"
+            aria-labelledby="timeline-panel-label timeline-year"
+        >
         <div id="timeline-row">
             <button id="timeline-prev">PREV YEAR</button>
             <button id="timeline-next">NEXT YEAR</button>
@@ -130,9 +190,9 @@
         </div>
         <div id="timeline-chart"></div>
         <div class="timeline-legend">
-            <span>CAPEX INDEX</span>
-            <span>DEBT INDEX</span>
-            <span>BUBBLE INDEX</span>
+            <span>CAPEX</span>
+            <span>DEBT</span>
+            <span>BUBBLE</span>
         </div>
         <div id="timeline-deepdive">
             <div><span class="deep-label">DRIVER:</span> GPU SUPPLY CONSTRAINTS.</div>
@@ -179,9 +239,39 @@
     </div>
 
     <div id="ctrl-btns">
+        <button id="btn-story-mode" onclick="toggleStoryMode()">[STORY] STORY MODE</button>
+        <button id="btn-simplified" onclick="toggleSimplified()">[VIEW] SIMPLIFIED VIEW</button>
         <button onclick="toggleLoop()">[MODE] TOGGLE MONEY LOOP (ANIMATED)</button>
         <button onclick="toggleChinaFlow()">[MODE] TOGGLE CHINA FLOW LAYER</button>
         <button onclick="window.location.reload()">[CMD] REBOOT TERMINAL</button>
+    </div>
+
+    <!-- Story Mode Overlay -->
+    <div id="story-overlay" role="dialog" aria-modal="true" aria-label="Story Mode">
+        <div id="story-card">
+            <button id="story-exit" onclick="exitStoryMode()">✕ EXIT</button>
+            <div id="story-year">2019</div>
+            <div id="story-title">THE FOUNDATION</div>
+            <div id="story-headline">Before the gold rush</div>
+            <div id="story-text">Loading story...</div>
+            <div id="story-stat"></div>
+            <div id="story-progress"></div>
+            <div id="story-nav">
+                <button id="story-prev">← PREV</button>
+                <button id="story-play">AUTO-PLAY</button>
+                <button id="story-next">NEXT CHAPTER →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simplified Legend (shown in simplified mode) -->
+    <div id="simplified-legend">
+        <div class="panel-title">MAP LEGEND</div>
+        <div><span class="legend-dot" style="background:#fff"></span> Online data center</div>
+        <div><span class="legend-dot" style="background:#62ffd2"></span> Expanding data center</div>
+        <div><span class="legend-dot" style="background:#ffcf70"></span> Planned / announced</div>
+        <div><span class="legend-dot" style="background:#94ffd9"></span> Currently selected</div>
+        <div style="margin-top:8px;opacity:0.6;">Green arcs = capital flows between sites and HQ</div>
     </div>
 
     <div id="frontier-overlay">

@@ -316,7 +316,11 @@ const CENTER_ONLINE_YEAR = {
 };
 
 DATA_CENTERS.forEach((center) => {
-  center.onlineYear = CENTER_ONLINE_YEAR[center.id] ?? 2024;
+  const mappedYear = CENTER_ONLINE_YEAR[center.id];
+  if (mappedYear == null) {
+    throw new Error(`Missing CENTER_ONLINE_YEAR entry for center id: ${center.id}`);
+  }
+  center.onlineYear = mappedYear;
 });
 
 const HQS = {
@@ -608,12 +612,16 @@ function syncBubbleToTimeline(year) {
   revenueGrowthInput.value = String(m.growth);
 }
 
+const CHART_WIDTH = 288;
+const CHART_HEIGHT = 80;
+const CHART_MAX_Y = 120;
+const CHART_COLOR_CAPEX = '#7ef0c2';
+const CHART_COLOR_DEBT = '#ffbf7f';
+const CHART_COLOR_BUBBLE = '#ff7676';
+
 function renderTimelineChart() {
-  const width = 288;
-  const height = 80;
-  const maxY = 120;
-  const x = (idx) => (idx / (TIMELINE_METRICS.length - 1)) * (width - 8) + 4;
-  const y = (val) => height - ((val / maxY) * (height - 12) + 6);
+  const x = (idx) => (idx / (TIMELINE_METRICS.length - 1)) * (CHART_WIDTH - 8) + 4;
+  const y = (val) => CHART_HEIGHT - ((val / CHART_MAX_Y) * (CHART_HEIGHT - 12) + 6);
 
   const pathFor = (key) =>
     TIMELINE_METRICS.map((row, idx) => `${idx === 0 ? 'M' : 'L'}${x(idx).toFixed(1)},${y(row[key]).toFixed(1)}`).join(' ');
@@ -622,11 +630,11 @@ function renderTimelineChart() {
   const cx = currentIdx >= 0 ? x(currentIdx).toFixed(1) : '4';
 
   timelineChartEl.innerHTML = `
-    <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" preserveAspectRatio="none">
-      <path d="${pathFor('capex')}" fill="none" stroke="#7ef0c2" stroke-width="1.8" />
-      <path d="${pathFor('debt')}" fill="none" stroke="#ffbf7f" stroke-width="1.6" />
-      <path d="${pathFor('bubble')}" fill="none" stroke="#ff7676" stroke-width="1.6" />
-      <line x1="${cx}" y1="4" x2="${cx}" y2="${height - 4}" stroke="#ffffff55" stroke-width="1" />
+    <svg viewBox="0 0 ${CHART_WIDTH} ${CHART_HEIGHT}" width="100%" height="${CHART_HEIGHT}" preserveAspectRatio="none">
+      <path d="${pathFor('capex')}" fill="none" stroke="${CHART_COLOR_CAPEX}" stroke-width="1.8" />
+      <path d="${pathFor('debt')}" fill="none" stroke="${CHART_COLOR_DEBT}" stroke-width="1.6" />
+      <path d="${pathFor('bubble')}" fill="none" stroke="${CHART_COLOR_BUBBLE}" stroke-width="1.6" />
+      <line x1="${cx}" y1="4" x2="${cx}" y2="${CHART_HEIGHT - 4}" stroke="#ffffff55" stroke-width="1" />
     </svg>
   `;
 }
@@ -690,7 +698,7 @@ function setTimelineYear(year) {
 
 function selectCenter(center, focus = true) {
   activeCenterId = center.id;
-  infoPanel.innerHTML = centerDetailsHtml(center);
+  infoPanel.innerHTML = simplifiedMode ? renderSimplifiedInfoHtml(center) : centerDetailsHtml(center);
 
   markerById.forEach((marker, id) => {
     const material = marker.material;
@@ -834,7 +842,8 @@ window.addEventListener('click', (event) => {
   pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
 
-  const hits = raycaster.intersectObjects(markerHitTargets.children);
+  const visibleHitTargets = markerHitTargets.children.filter((obj) => obj.visible);
+  const hits = raycaster.intersectObjects(visibleHitTargets);
   if (hits.length === 0) return;
   const center = hits[0].object.userData;
   selectCenter(center, true);
@@ -847,10 +856,148 @@ window.addEventListener('resize', () => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
-renderCenterList('');
-selectCenter(DATA_CENTERS[0], false);
 setTimelineYear(2019);
+const initialCenter = DATA_CENTERS.find((center) => center.onlineYear <= 2019);
+if (initialCenter) selectCenter(initialCenter, false);
 updateBubbleLab();
+
+// ─── STORY MODE ────────────────────────────────────────────────────────────────
+
+const STORY_CHAPTERS = {
+  2019: { title: 'THE FOUNDATION', headline: 'Before the gold rush', story: 'AI is moving from research curiosity to real product. A handful of data centers house early large-model experiments. Balance sheets are clean, debt is manageable. Nobody yet knows the boom is coming.', stat: '~8 major AI data centers online globally' },
+  2020: { title: 'DIGITAL ACCELERATION', headline: 'Pandemic rewrites the roadmap', story: 'Lockdowns force the world online overnight. Cloud demand spikes 40%. GPU orders quietly accelerate. Cheap credit makes big infrastructure bets easy to justify — the quiet buildup begins.', stat: 'Cloud spend grows 40% YoY; interest rates near zero' },
+  2021: { title: 'SCALE-UP ERA', headline: 'Large models become serious business', story: 'Enterprises commit to multi-year cloud contracts. Foundation model training budgets multiply. Power contracts spanning decades get signed. The infrastructure race is on — everyone is locking in capacity.', stat: 'Training compute doubles every ~6 months' },
+  2022: { title: 'THE INFLECTION POINT', headline: 'ChatGPT launches. Everything changes.', story: 'One product launch reshapes investor expectations globally. Capital markets reward AI growth at any cost. Debt-backed expansion becomes trivially easy to justify. The narrative overwhelms the numbers.', stat: '$100B+ in new AI commitments announced in 90 days' },
+  2023: { title: 'THE GPU SCRAMBLE', headline: 'Everyone wants H100s. Nobody has enough.', story: 'Data center retrofits, GPU lease premiums, and colocation deals spike. Execution risk rises as operators race to add capacity faster than infrastructure can absorb it. The bubble begins to inflate.', stat: 'H100 spot prices hit $40K+; 12-month wait lists form' },
+  2024: { title: 'HYPERSCALE CAPEX CYCLE', headline: 'The biggest infrastructure bet in history', story: 'AWS, Azure, Google, and Meta collectively pledge over $300B in AI capex. The narrative shifts from "can we build it?" to "can we monetize it?" Utilization starts to slip as supply outpaces demand.', stat: '$300B+ combined 2024 AI capex pledges from top-4 operators' },
+  2025: { title: 'MONETIZATION TEST', headline: 'Now you have to show the money.', story: 'Revenue per token and enterprise AI conversion rates become the metrics that matter. Investors start asking hard questions. Weak utilization hurts margins. The easy credit phase is ending.', stat: 'Average GPU cluster utilization drops below 80%' },
+  2026: { title: 'DEBT REPRICING WINDOW', headline: 'Rates stay higher. Refinancing bites.', story: 'Debt maturities cluster. Operators who over-borrowed at low rates now refinance at higher ones. Interest coverage ratios deteriorate. Operators with thin margins face real stress for the first time.', stat: '$200B+ in AI-linked debt maturing 2026–2028' },
+  2027: { title: 'CONSOLIDATION RISK', headline: 'The weakest clusters face write-downs.', story: 'If demand growth slows, overbuilt GPU clusters become stranded assets. Efficiency gains from smaller models reduce compute demand per output. Older facilities struggle to stay economically viable.', stat: 'Estimated 15–25% of installed AI capacity sits underutilized' },
+  2028: { title: 'EFFICIENCY WARS', headline: 'Doing more with less becomes survival.', story: 'Model compression and inference optimization slash compute costs per output. Weaker, less-efficient data centers lose workloads to modern facilities. The market bifurcates: lean operators pull ahead.', stat: 'Inference cost per 1M tokens falls 80% from 2023 peak' },
+  2029: { title: 'RESET OR RE-ACCELERATION', headline: 'The market picks its winners.', story: 'High-utilization, well-capitalized operators compound their advantage. Over-levered players cut capex aggressively and sell assets. A second demand wave from new applications may rescue some — or not.', stat: 'Top-3 operators hold 60%+ of profitable AI workloads' },
+  2030: { title: 'THE NEW BASELINE', headline: 'AI infrastructure becomes a utility.', story: 'For survivors, AI infrastructure settles into utility-like economics — stable margins, long contracts, predictable demand. Debt discipline decided who made it. The frontier has moved to space and energy abundance.', stat: 'AI data center market consolidates to ~8 dominant operators' }
+};
+
+const storyOverlayEl = document.getElementById('story-overlay');
+const storyYearEl = document.getElementById('story-year');
+const storyTitleEl = document.getElementById('story-title');
+const storyHeadlineEl = document.getElementById('story-headline');
+const storyTextEl = document.getElementById('story-text');
+const storyStatEl = document.getElementById('story-stat');
+const storyProgressEl = document.getElementById('story-progress');
+const storyPrevBtn = document.getElementById('story-prev');
+const storyNextBtn = document.getElementById('story-next');
+const storyExitBtn = document.getElementById('story-exit');
+const storyPlayBtn = document.getElementById('story-play');
+const storyModeBtn = document.getElementById('btn-story-mode');
+
+let storyModeActive = false;
+let storyTimer = null;
+
+function renderStoryCard(year) {
+  const ch = STORY_CHAPTERS[year] ?? STORY_CHAPTERS[2019];
+  const entry = timelineEntry(year);
+  const idx = year - 2019;
+  storyYearEl.innerText = String(year);
+  storyTitleEl.innerText = ch.title;
+  storyHeadlineEl.innerText = ch.headline;
+  storyTextEl.innerText = ch.story;
+  storyStatEl.innerText = ch.stat;
+
+  const dots = Array.from({ length: 12 }, (_, i) =>
+    `<span class="story-dot${i === idx ? ' active' : ''}"></span>`
+  ).join('');
+  storyProgressEl.innerHTML = dots;
+
+  storyPrevBtn.disabled = year <= 2019;
+  storyNextBtn.disabled = year >= 2030;
+  storyNextBtn.innerText = year >= 2030 ? 'FINISH' : 'NEXT CHAPTER';
+
+  setTimelineYear(year);
+}
+
+function stopStoryPlayback() {
+  if (storyTimer) { clearInterval(storyTimer); storyTimer = null; }
+  if (storyPlayBtn) storyPlayBtn.innerText = 'AUTO-PLAY';
+}
+
+function startStoryPlayback() {
+  stopStoryPlayback();
+  if (storyPlayBtn) storyPlayBtn.innerText = 'PAUSE';
+  storyTimer = setInterval(() => {
+    if (currentTimelineYear >= 2030) { stopStoryPlayback(); return; }
+    renderStoryCard(currentTimelineYear + 1);
+  }, 3500);
+}
+
+window.enterStoryMode = function() {
+  storyModeActive = true;
+  storyModeBtn.innerText = '[STORY] EXIT STORY';
+  storyOverlayEl.classList.add('show');
+  renderStoryCard(currentTimelineYear);
+};
+
+window.exitStoryMode = function() {
+  storyModeActive = false;
+  storyModeBtn.innerText = '[STORY] STORY MODE';
+  storyOverlayEl.classList.remove('show');
+  stopStoryPlayback();
+};
+
+window.toggleStoryMode = function() {
+  if (storyModeActive) window.exitStoryMode(); else window.enterStoryMode();
+};
+
+if (storyPrevBtn) storyPrevBtn.addEventListener('click', () => { stopStoryPlayback(); renderStoryCard(currentTimelineYear - 1); });
+if (storyNextBtn) storyNextBtn.addEventListener('click', () => {
+  stopStoryPlayback();
+  if (currentTimelineYear >= 2030) { window.exitStoryMode(); return; }
+  renderStoryCard(currentTimelineYear + 1);
+});
+if (storyExitBtn) storyExitBtn.addEventListener('click', window.exitStoryMode);
+if (storyPlayBtn) storyPlayBtn.addEventListener('click', () => { if (storyTimer) stopStoryPlayback(); else startStoryPlayback(); });
+
+// ─── SIMPLIFIED VIEW ────────────────────────────────────────────────────────────
+
+let simplifiedMode = false;
+const simplifiedBtnEl = document.getElementById('btn-simplified');
+
+function simplifiedStatusLabel(status) {
+  if (status === 'Operational') return 'Online';
+  if (status === 'Expansion') return 'Growing';
+  return 'Planned';
+}
+
+function simplifiedRiskLabel(level) {
+  if (level === 'High') return 'High impact';
+  if (level === 'Medium') return 'Moderate impact';
+  return 'Low impact';
+}
+
+function renderSimplifiedInfoHtml(center) {
+  return [
+    `<div style="font-size:13px;color:#adffd8;margin-bottom:10px;">${center.name}</div>`,
+    `<div style="margin-bottom:6px;"><b>Company:</b> ${center.operator}</div>`,
+    `<div style="margin-bottom:6px;"><b>Status:</b> ${simplifiedStatusLabel(center.status)}</div>`,
+    `<div style="margin-bottom:6px;"><b>Energy use:</b> ${center.powerMW} megawatts — enough to power ~${Math.round(center.powerMW * 750).toLocaleString()} homes</div>`,
+    `<div style="margin-bottom:6px;"><b>What it does:</b> ${center.role}</div>`,
+    `<div style="margin-bottom:6px;"><b>AI models hosted here:</b> ${center.models.join(', ')}</div>`,
+    `<div style="margin-bottom:6px;"><b>Cooling method:</b> ${center.cooling}</div>`,
+    `<div style="margin-bottom:6px;"><b>Water usage concern:</b> ${simplifiedRiskLabel(center.waterRisk)}</div>`,
+    `<div style="margin-bottom:6px;"><b>Local jobs:</b> ${center.jobs}</div>`,
+    `<div style="margin-top:10px;opacity:0.55;font-size:9px;">DATA IS CURATED FROM PUBLIC OPERATOR DISCLOSURES.</div>`
+  ].join('');
+}
+
+window.toggleSimplified = function() {
+  simplifiedMode = !simplifiedMode;
+  document.body.classList.toggle('simplified', simplifiedMode);
+  if (simplifiedBtnEl) simplifiedBtnEl.innerText = simplifiedMode ? '[VIEW] EXPERT MODE' : '[VIEW] SIMPLIFIED VIEW';
+  const activeCenter = DATA_CENTERS.find((c) => c.id === activeCenterId);
+  if (activeCenter) {
+    infoPanel.innerHTML = simplifiedMode ? renderSimplifiedInfoHtml(activeCenter) : centerDetailsHtml(activeCenter);
+  }
+};
 
 function animate() {
   requestAnimationFrame(animate);
