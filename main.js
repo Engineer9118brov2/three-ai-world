@@ -21,6 +21,17 @@ const revenueGrowthVal = document.getElementById('revenue-growth-val');
 const bubbleBaseBtn = document.getElementById('bubble-base');
 const bubbleStressBtn = document.getElementById('bubble-stress');
 const bubbleResetBtn = document.getElementById('bubble-reset');
+const timelineYearEl = document.getElementById('timeline-year');
+const timelinePhaseEl = document.getElementById('timeline-phase');
+const timelineDescEl = document.getElementById('timeline-desc');
+const timelineSlider = document.getElementById('timeline-slider');
+const timelinePrevBtn = document.getElementById('timeline-prev');
+const timelineNextBtn = document.getElementById('timeline-next');
+const timelinePlayBtn = document.getElementById('timeline-play');
+const timelineSpeedSelect = document.getElementById('timeline-speed');
+const timelineChartEl = document.getElementById('timeline-chart');
+const timelineDeepDiveEl = document.getElementById('timeline-deepdive');
+const frontierOverlayEl = document.getElementById('frontier-overlay');
 
 let renderer;
 try {
@@ -47,7 +58,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.06;
 controls.minDistance = 2.5;
-controls.maxDistance = 52;
+controls.maxDistance = 70;
 controls.target.set(0, 0, 0);
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.7));
@@ -60,6 +71,8 @@ scene.add(rimLight);
 
 const globeGroup = new THREE.Group();
 scene.add(globeGroup);
+const starsGroup = new THREE.Group();
+scene.add(starsGroup);
 
 const globeRadius = 2;
 const earthTexture = new THREE.TextureLoader().load(earthTextureUrl);
@@ -98,6 +111,28 @@ const atmosphere = new THREE.Mesh(
   })
 );
 globeGroup.add(atmosphere);
+
+const starCount = 2800;
+const starPositions = new Float32Array(starCount * 3);
+for (let i = 0; i < starCount; i += 1) {
+  const radius = 160 + Math.random() * 260;
+  const theta = Math.random() * Math.PI * 2;
+  const phi = Math.acos(2 * Math.random() - 1);
+  starPositions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+  starPositions[i * 3 + 1] = radius * Math.cos(phi);
+  starPositions[i * 3 + 2] = radius * Math.sin(phi) * Math.sin(theta);
+}
+const starGeometry = new THREE.BufferGeometry();
+starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+const starMaterial = new THREE.PointsMaterial({
+  color: 0xcde6ff,
+  size: 0.95,
+  transparent: true,
+  opacity: 0.15,
+  depthWrite: false
+});
+const starField = new THREE.Points(starGeometry, starMaterial);
+starsGroup.add(starField);
 
 function latLonToVector3(lat, lon, radius) {
   const phi = (90 - lat) * (Math.PI / 180);
@@ -170,6 +205,51 @@ const BUBBLE_OPERATORS = {
   CHINA: { debtB: 210, capexB: 78, revenueB: 95, ebitdaMargin: 0.2, baseRate: 5.0, aiShare: 0.34 }
 };
 
+const TIMELINE = [
+  { year: 2019, phase: 'PRE-BOOM', desc: 'AI spend is meaningful but still niche. Capex and debt loads are manageable; utilization is variable.' },
+  { year: 2020, phase: 'DIGITAL ACCELERATION', desc: 'Pandemic demand accelerates cloud migration. GPU demand starts outpacing supply in key regions.' },
+  { year: 2021, phase: 'SCALE-UP', desc: 'Large model training budgets rise sharply; infrastructure commitments lock in multiyear power contracts.' },
+  { year: 2022, phase: 'GEN-AI INFLECTION', desc: 'Public launch moment. Capital markets reward growth; debt-backed expansion becomes easier to justify.' },
+  { year: 2023, phase: 'GPU SCRAMBLE', desc: 'Datacenter retrofits, colocation GPU deals, and leasing premiums spike. Execution risk rises.' },
+  { year: 2024, phase: 'HYPERSCALE CAPEX CYCLE', desc: 'Massive AI capex wave. Narrative shifts from capability race to monetization pressure.' },
+  { year: 2025, phase: 'MONETIZATION TEST', desc: 'Revenue per token and enterprise conversion rates become key. Weak utilization starts hurting margins.' },
+  { year: 2026, phase: 'DEBT REPRICING WINDOW', desc: 'Refinancing and power-cost sensitivity matter more. Operators with low coverage ratios face stress.' },
+  { year: 2027, phase: 'CONSOLIDATION RISK', desc: 'If demand growth slows, overbuilt clusters and idle accelerators can force write-downs.' },
+  { year: 2028, phase: 'EFFICIENCY WARS', desc: 'Model compression and inference efficiency reduce spend per output; weaker facilities struggle to stay full.' },
+  { year: 2029, phase: 'RESET OR RE-ACCELERATION', desc: 'Market bifurcates: high-utilization operators compound, over-levered players cut capex aggressively.' },
+  { year: 2030, phase: 'NEW BASELINE', desc: 'AI infrastructure matures into utility-like economics for winners; debt discipline decides survivorship.' }
+];
+
+const TIMELINE_METRICS = [
+  { year: 2019, capex: 18, debt: 22, bubble: 16, util: 74, powerInflation: 2, growth: 9, rateShock: 0.1 },
+  { year: 2020, capex: 23, debt: 27, bubble: 20, util: 77, powerInflation: 4, growth: 14, rateShock: 0.2 },
+  { year: 2021, capex: 31, debt: 34, bubble: 27, util: 81, powerInflation: 7, growth: 18, rateShock: 0.4 },
+  { year: 2022, capex: 43, debt: 48, bubble: 39, util: 86, powerInflation: 10, growth: 28, rateShock: 0.8 },
+  { year: 2023, capex: 57, debt: 64, bubble: 53, util: 88, powerInflation: 16, growth: 31, rateShock: 1.2 },
+  { year: 2024, capex: 71, debt: 79, bubble: 62, util: 85, powerInflation: 18, growth: 24, rateShock: 1.5 },
+  { year: 2025, capex: 83, debt: 94, bubble: 67, util: 79, powerInflation: 22, growth: 17, rateShock: 2.0 },
+  { year: 2026, capex: 88, debt: 107, bubble: 73, util: 73, powerInflation: 27, growth: 10, rateShock: 2.6 },
+  { year: 2027, capex: 82, debt: 112, bubble: 78, util: 68, powerInflation: 33, growth: 6, rateShock: 3.1 },
+  { year: 2028, capex: 74, debt: 110, bubble: 70, util: 71, powerInflation: 25, growth: 9, rateShock: 2.4 },
+  { year: 2029, capex: 69, debt: 104, bubble: 64, util: 75, powerInflation: 19, growth: 12, rateShock: 1.8 },
+  { year: 2030, capex: 66, debt: 98, bubble: 58, util: 78, powerInflation: 14, growth: 14, rateShock: 1.2 }
+];
+
+const TIMELINE_DEEP_DIVE = {
+  2019: { driver: 'EARLY FOUNDATION MODEL EXPERIMENTS', debt: 'BALANCE SHEETS STILL FLEXIBLE', trigger: 'GPU PRICES OUTPACE CUSTOMER VALUE', response: 'KEEP SPEND DISCIPLINED' },
+  2020: { driver: 'PANDEMIC DIGITAL DEMAND SHOCK', debt: 'CHEAP CREDIT SUPPORTS CAPEX', trigger: 'DEMAND NORMALIZATION', response: 'LOCK LONG-TERM CONTRACTS CAUTIOUSLY' },
+  2021: { driver: 'MULTI-CLOUD ENTERPRISE UPTAKE', debt: 'DEBT BUILDING BUT COVERED', trigger: 'CLOUD PRICE COMPRESSION', response: 'PRIORITIZE HIGH-MARGIN USE CASES' },
+  2022: { driver: 'GEN-AI PRODUCT BREAKOUT', debt: 'CAPEX COMMITMENTS ACCELERATE', trigger: "USAGE DOESN'T CONVERT TO REVENUE", response: 'TIGHTEN UNIT ECONOMICS' },
+  2023: { driver: 'GPU SUPPLY SCRAMBLE', debt: 'LEASE + FINANCING STACK EXPANDS', trigger: 'IDLE CAPACITY POST-BUYING WAVE', response: 'SHIFT TO FLEXIBLE CAPACITY' },
+  2024: { driver: 'HYPERSCALE ARMS RACE', debt: 'LARGE MATURITY WALL FORMING', trigger: 'RATE STAYS HIGHER FOR LONGER', response: 'DE-LAYER CAPEX PRIORITIES' },
+  2025: { driver: 'ROI PRESSURE FROM INVESTORS', debt: 'INTEREST COVERAGE STARTS FRAGILE FOR SOME', trigger: 'TOKEN PRICING DETERIORATION', response: 'FOCUS ON PROFITABLE VERTICALS' },
+  2026: { driver: 'REFINANCING WINDOW OPENS', debt: 'ROLLING DEBT COSTS STEP UP', trigger: 'UTILIZATION < 70%', response: 'CAPEX CUTS + CONSOLIDATION' },
+  2027: { driver: 'EFFICIENCY MODELS REDUCE DEMAND PER TOKEN', debt: 'LEGACY ASSETS RISK STRANDING', trigger: 'WRITE-DOWNS ON OLD CLUSTERS', response: 'RETIRE LOW-EFFICIENCY FLEETS' },
+  2028: { driver: 'PLATFORM CONSOLIDATION', debt: 'SURVIVORS IMPROVE COVERAGE', trigger: 'POWER SUPPLY SHOCK', response: 'GEOGRAPHIC LOAD BALANCING' },
+  2029: { driver: 'MARKET REPRICING', debt: 'DEBT METRICS STABILIZE FOR WINNERS', trigger: 'SECOND DEMAND SLOWDOWN', response: 'ASSET-LIGHT EXPANSION' },
+  2030: { driver: 'UTILITY-LIKE AI INFRA MODEL', debt: 'DISCIPLINED CAPITAL RETURNS', trigger: 'POLICY/GRID CONSTRAINTS', response: 'LONG-HORIZON CAPACITY PLANNING' }
+};
+
 const DATA_CENTERS = [
   { id: 'aws-1', name: 'AWS US-East (N. Virginia)', operator: 'AWS', lat: 38.95, lon: -77.45, status: 'Operational', powerMW: 620, models: ['Claude', 'Llama', 'Mistral', 'Titan'], cooling: 'Air + liquid retrofit', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '1100 direct / 3600 indirect', role: 'Primary east-coast AI inference + training region.' },
   { id: 'aws-2', name: 'AWS US-West (Oregon)', operator: 'AWS', lat: 45.6, lon: -121.18, status: 'Operational', powerMW: 480, models: ['Claude', 'Llama', 'Titan', 'Stable Diffusion'], cooling: 'Evaporative + liquid loops', waterRisk: 'Medium', gridRisk: 'Low', jobs: '850 / 2500', role: 'West-coast low-latency model serving and batch training.' },
@@ -222,6 +302,27 @@ const DATA_CENTERS = [
   { id: 'cn-5', name: 'ByteDance Ulanqab Hub', operator: 'CHINA', lat: 41.03, lon: 113.12, status: 'Expansion', powerMW: 300, models: ['Recommendation + video generation models'], cooling: 'Air + liquid retrofit', waterRisk: 'Low', gridRisk: 'Medium', jobs: '480 / 1400', role: 'Massive recommender and media model infrastructure.' }
 ];
 
+const CENTER_ONLINE_YEAR = {
+  'aws-1': 2019, 'aws-2': 2019, 'aws-3': 2020, 'aws-4': 2021, 'aws-5': 2021, 'aws-6': 2025,
+  'az-1': 2019, 'az-2': 2020, 'az-3': 2021, 'az-4': 2020, 'az-5': 2025, 'az-6': 2028,
+  'gcp-1': 2019, 'gcp-2': 2019, 'gcp-3': 2020, 'gcp-4': 2020, 'gcp-5': 2021, 'gcp-6': 2027,
+  'meta-1': 2020, 'meta-2': 2021, 'meta-3': 2020, 'meta-4': 2025,
+  'orcl-1': 2021, 'orcl-2': 2021, 'orcl-3': 2026,
+  'ibm-1': 2021, 'ibm-2': 2022,
+  'cw-1': 2023, 'cw-2': 2026,
+  'colo-1': 2020, 'colo-2': 2021, 'colo-3': 2026, 'colo-4': 2022,
+  'nv-1': 2024, 'xai-1': 2024,
+  'cn-1': 2022, 'cn-2': 2022, 'cn-3': 2026, 'cn-4': 2023, 'cn-5': 2026
+};
+
+DATA_CENTERS.forEach((center) => {
+  const mappedYear = CENTER_ONLINE_YEAR[center.id];
+  if (mappedYear == null) {
+    throw new Error(`Missing CENTER_ONLINE_YEAR entry for center id: ${center.id}`);
+  }
+  center.onlineYear = mappedYear;
+});
+
 const HQS = {
   AWS: { lat: 47.62, lon: -122.33 },
   AZURE: { lat: 47.67, lon: -122.12 },
@@ -261,6 +362,7 @@ function statusColor(status) {
 }
 
 const markerById = new Map();
+const centerSceneMeta = new Map();
 DATA_CENTERS.forEach((center) => {
   const position = latLonToVector3(center.lat, center.lon, globeRadius + 0.03);
   const marker = new THREE.Mesh(
@@ -287,7 +389,11 @@ DATA_CENTERS.forEach((center) => {
 
   const hq = HQS[center.operator];
   if (hq && !(hq.lat === center.lat && hq.lon === center.lon)) {
-    arcs.add(createArc(center, hq, 0x70f8c6, 0.12, 2.7));
+    const arc = createArc(center, hq, 0x70f8c6, 0.12, 2.7);
+    arcs.add(arc);
+    centerSceneMeta.set(center.id, { marker, hitTarget, arc });
+  } else {
+    centerSceneMeta.set(center.id, { marker, hitTarget, arc: null });
   }
 });
 
@@ -327,6 +433,12 @@ let activeCenterId = null;
 let focusPoint = null;
 let pointerDownPos = null;
 let draggedSincePointerDown = false;
+let currentTimelineYear = 2019;
+let timelineTimer = null;
+let spaceTransition = 0;
+
+const SPACE_ZOOM_START = 14;
+const SPACE_ZOOM_FULL = 36;
 
 controls.addEventListener('start', () => {
   draggedSincePointerDown = true;
@@ -488,9 +600,105 @@ function updateBubbleLab() {
   `;
 }
 
+function timelineMetrics(year) {
+  return TIMELINE_METRICS.find((item) => item.year === year) ?? TIMELINE_METRICS[0];
+}
+
+function syncBubbleToTimeline(year) {
+  const m = timelineMetrics(year);
+  rateShockInput.value = m.rateShock.toFixed(1);
+  utilizationInput.value = String(m.util);
+  powerInflationInput.value = String(m.powerInflation);
+  revenueGrowthInput.value = String(m.growth);
+}
+
+const CHART_WIDTH = 288;
+const CHART_HEIGHT = 80;
+const CHART_MAX_Y = 120;
+const CHART_COLOR_CAPEX = '#7ef0c2';
+const CHART_COLOR_DEBT = '#ffbf7f';
+const CHART_COLOR_BUBBLE = '#ff7676';
+
+function renderTimelineChart() {
+  const x = (idx) => (idx / (TIMELINE_METRICS.length - 1)) * (CHART_WIDTH - 8) + 4;
+  const y = (val) => CHART_HEIGHT - ((val / CHART_MAX_Y) * (CHART_HEIGHT - 12) + 6);
+
+  const pathFor = (key) =>
+    TIMELINE_METRICS.map((row, idx) => `${idx === 0 ? 'M' : 'L'}${x(idx).toFixed(1)},${y(row[key]).toFixed(1)}`).join(' ');
+
+  const currentIdx = TIMELINE_METRICS.findIndex((row) => row.year === currentTimelineYear);
+  const cx = currentIdx >= 0 ? x(currentIdx).toFixed(1) : '4';
+
+  timelineChartEl.innerHTML = `
+    <svg viewBox="0 0 ${CHART_WIDTH} ${CHART_HEIGHT}" width="100%" height="${CHART_HEIGHT}" preserveAspectRatio="none">
+      <path d="${pathFor('capex')}" fill="none" stroke="${CHART_COLOR_CAPEX}" stroke-width="1.8" />
+      <path d="${pathFor('debt')}" fill="none" stroke="${CHART_COLOR_DEBT}" stroke-width="1.6" />
+      <path d="${pathFor('bubble')}" fill="none" stroke="${CHART_COLOR_BUBBLE}" stroke-width="1.6" />
+      <line x1="${cx}" y1="4" x2="${cx}" y2="${CHART_HEIGHT - 4}" stroke="#ffffff55" stroke-width="1" />
+    </svg>
+  `;
+}
+
+function renderTimelineDeepDive(year) {
+  const deep = TIMELINE_DEEP_DIVE[year] ?? TIMELINE_DEEP_DIVE[2019];
+  const m = timelineMetrics(year);
+  const maturityPressure =
+    year <= 2022 ? 'LOW' : year <= 2025 ? 'MEDIUM' : year <= 2027 ? 'HIGH' : 'MEDIUM';
+
+  timelineDeepDiveEl.innerHTML = [
+    `<div><span class="deep-label">DRIVER:</span> ${deep.driver}</div>`,
+    `<div><span class="deep-label">DEBT SIGNAL:</span> ${deep.debt}</div>`,
+    `<div><span class="deep-label">TRIGGER:</span> ${deep.trigger}</div>`,
+    `<div><span class="deep-label">RESPONSE:</span> ${deep.response}</div>`,
+    `<div style="margin-top:6px;"><span class="deep-label">MATURITY PRESSURE:</span> ${maturityPressure}</div>`,
+    `<div><span class="deep-label">UTILIZATION BASELINE:</span> ${m.util}%</div>`
+  ].join('');
+}
+
+function timelineEntry(year) {
+  return TIMELINE.find((item) => item.year === year) ?? TIMELINE[0];
+}
+
+function applyTimelineVisibility() {
+  const visibleCenters = DATA_CENTERS.filter((center) => center.onlineYear <= currentTimelineYear);
+  const visibleSet = new Set(visibleCenters.map((center) => center.id));
+
+  centerSceneMeta.forEach((meta, centerId) => {
+    const isVisible = visibleSet.has(centerId);
+    meta.marker.visible = isVisible;
+    meta.hitTarget.visible = isVisible;
+    if (meta.arc) meta.arc.visible = isVisible;
+  });
+
+  if (activeCenterId && !visibleSet.has(activeCenterId)) {
+    const fallback = visibleCenters[visibleCenters.length - 1];
+    if (fallback) selectCenter(fallback, false);
+  }
+
+  updateStats(visibleCenters);
+  renderCenterList(searchInput.value || '');
+}
+
+function setTimelineYear(year) {
+  const clamped = Math.max(2019, Math.min(2030, Math.round(year)));
+  currentTimelineYear = clamped;
+
+  const entry = timelineEntry(clamped);
+  timelineYearEl.innerText = String(clamped);
+  timelinePhaseEl.innerText = entry.phase;
+  timelineDescEl.innerText = entry.desc;
+  timelineSlider.value = String(clamped);
+
+  syncBubbleToTimeline(clamped);
+  updateBubbleLab();
+  renderTimelineChart();
+  renderTimelineDeepDive(clamped);
+  applyTimelineVisibility();
+}
+
 function selectCenter(center, focus = true) {
   activeCenterId = center.id;
-  infoPanel.innerHTML = centerDetailsHtml(center);
+  infoPanel.innerHTML = simplifiedMode ? renderSimplifiedInfoHtml(center) : centerDetailsHtml(center);
 
   markerById.forEach((marker, id) => {
     const material = marker.material;
@@ -511,6 +719,7 @@ function selectCenter(center, focus = true) {
 function renderCenterList(query = '') {
   const q = query.trim().toLowerCase();
   const filtered = DATA_CENTERS.filter((center) => {
+    if (center.onlineYear > currentTimelineYear) return false;
     const hay = `${center.name} ${center.operator} ${center.status} ${center.models.join(' ')}`.toLowerCase();
     return !q || hay.includes(q);
   });
@@ -535,16 +744,61 @@ function renderCenterList(query = '') {
   });
 }
 
-function updateStats() {
-  const totalPower = DATA_CENTERS.reduce((sum, center) => sum + center.powerMW, 0);
-  const operational = DATA_CENTERS.filter((center) => center.status === 'Operational').length;
-  statSites.innerText = String(DATA_CENTERS.length);
+function updateStats(centers = DATA_CENTERS) {
+  const totalPower = centers.reduce((sum, center) => sum + center.powerMW, 0);
+  const operational = centers.filter((center) => center.status === 'Operational').length;
+  statSites.innerText = String(centers.length);
   statPower.innerText = `${totalPower} MW`;
   statOperational.innerText = String(operational);
 }
 
 searchInput.addEventListener('input', () => {
   renderCenterList(searchInput.value || '');
+});
+
+timelineSlider.addEventListener('input', (event) => {
+  setTimelineYear(Number.parseInt(event.target.value, 10));
+});
+
+timelinePrevBtn.addEventListener('click', () => {
+  setTimelineYear(currentTimelineYear - 1);
+});
+
+timelineNextBtn.addEventListener('click', () => {
+  setTimelineYear(currentTimelineYear + 1);
+});
+
+function stopTimelinePlayback() {
+  if (timelineTimer) {
+    clearInterval(timelineTimer);
+    timelineTimer = null;
+  }
+  timelinePlayBtn.innerText = 'PLAY';
+}
+
+function startTimelinePlayback() {
+  stopTimelinePlayback();
+  timelinePlayBtn.innerText = 'PAUSE';
+  const speed = Number.parseInt(timelineSpeedSelect.value, 10) || 1300;
+  timelineTimer = setInterval(() => {
+    if (currentTimelineYear >= 2030) {
+      stopTimelinePlayback();
+      return;
+    }
+    setTimelineYear(currentTimelineYear + 1);
+  }, speed);
+}
+
+timelinePlayBtn.addEventListener('click', () => {
+  if (timelineTimer) {
+    stopTimelinePlayback();
+  } else {
+    startTimelinePlayback();
+  }
+});
+
+timelineSpeedSelect.addEventListener('change', () => {
+  if (timelineTimer) startTimelinePlayback();
 });
 
 [rateShockInput, utilizationInput, powerInflationInput, revenueGrowthInput].forEach((input) => {
@@ -588,7 +842,8 @@ window.addEventListener('click', (event) => {
   pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
 
-  const hits = raycaster.intersectObjects(markerHitTargets.children);
+  const visibleHitTargets = markerHitTargets.children.filter((obj) => obj.visible);
+  const hits = raycaster.intersectObjects(visibleHitTargets);
   if (hits.length === 0) return;
   const center = hits[0].object.userData;
   selectCenter(center, true);
@@ -601,19 +856,174 @@ window.addEventListener('resize', () => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
-updateStats();
-renderCenterList('');
-selectCenter(DATA_CENTERS[0], false);
+setTimelineYear(2019);
+const initialCenter = DATA_CENTERS.find((center) => center.onlineYear <= 2019);
+if (initialCenter) selectCenter(initialCenter, false);
 updateBubbleLab();
+
+// ─── STORY MODE ────────────────────────────────────────────────────────────────
+
+const STORY_CHAPTERS = {
+  2019: { title: 'THE FOUNDATION', headline: 'Before the gold rush', story: 'AI is moving from research curiosity to real product. A handful of data centers house early large-model experiments. Balance sheets are clean, debt is manageable. Nobody yet knows the boom is coming.', stat: '~8 major AI data centers online globally' },
+  2020: { title: 'DIGITAL ACCELERATION', headline: 'Pandemic rewrites the roadmap', story: 'Lockdowns force the world online overnight. Cloud demand spikes 40%. GPU orders quietly accelerate. Cheap credit makes big infrastructure bets easy to justify — the quiet buildup begins.', stat: 'Cloud spend grows 40% YoY; interest rates near zero' },
+  2021: { title: 'SCALE-UP ERA', headline: 'Large models become serious business', story: 'Enterprises commit to multi-year cloud contracts. Foundation model training budgets multiply. Power contracts spanning decades get signed. The infrastructure race is on — everyone is locking in capacity.', stat: 'Training compute doubles every ~6 months' },
+  2022: { title: 'THE INFLECTION POINT', headline: 'ChatGPT launches. Everything changes.', story: 'One product launch reshapes investor expectations globally. Capital markets reward AI growth at any cost. Debt-backed expansion becomes trivially easy to justify. The narrative overwhelms the numbers.', stat: '$100B+ in new AI commitments announced in 90 days' },
+  2023: { title: 'THE GPU SCRAMBLE', headline: 'Everyone wants H100s. Nobody has enough.', story: 'Data center retrofits, GPU lease premiums, and colocation deals spike. Execution risk rises as operators race to add capacity faster than infrastructure can absorb it. The bubble begins to inflate.', stat: 'H100 spot prices hit $40K+; 12-month wait lists form' },
+  2024: { title: 'HYPERSCALE CAPEX CYCLE', headline: 'The biggest infrastructure bet in history', story: 'AWS, Azure, Google, and Meta collectively pledge over $300B in AI capex. The narrative shifts from "can we build it?" to "can we monetize it?" Utilization starts to slip as supply outpaces demand.', stat: '$300B+ combined 2024 AI capex pledges from top-4 operators' },
+  2025: { title: 'MONETIZATION TEST', headline: 'Now you have to show the money.', story: 'Revenue per token and enterprise AI conversion rates become the metrics that matter. Investors start asking hard questions. Weak utilization hurts margins. The easy credit phase is ending.', stat: 'Average GPU cluster utilization drops below 80%' },
+  2026: { title: 'DEBT REPRICING WINDOW', headline: 'Rates stay higher. Refinancing bites.', story: 'Debt maturities cluster. Operators who over-borrowed at low rates now refinance at higher ones. Interest coverage ratios deteriorate. Operators with thin margins face real stress for the first time.', stat: '$200B+ in AI-linked debt maturing 2026–2028' },
+  2027: { title: 'CONSOLIDATION RISK', headline: 'The weakest clusters face write-downs.', story: 'If demand growth slows, overbuilt GPU clusters become stranded assets. Efficiency gains from smaller models reduce compute demand per output. Older facilities struggle to stay economically viable.', stat: 'Estimated 15–25% of installed AI capacity sits underutilized' },
+  2028: { title: 'EFFICIENCY WARS', headline: 'Doing more with less becomes survival.', story: 'Model compression and inference optimization slash compute costs per output. Weaker, less-efficient data centers lose workloads to modern facilities. The market bifurcates: lean operators pull ahead.', stat: 'Inference cost per 1M tokens falls 80% from 2023 peak' },
+  2029: { title: 'RESET OR RE-ACCELERATION', headline: 'The market picks its winners.', story: 'High-utilization, well-capitalized operators compound their advantage. Over-levered players cut capex aggressively and sell assets. A second demand wave from new applications may rescue some — or not.', stat: 'Top-3 operators hold 60%+ of profitable AI workloads' },
+  2030: { title: 'THE NEW BASELINE', headline: 'AI infrastructure becomes a utility.', story: 'For survivors, AI infrastructure settles into utility-like economics — stable margins, long contracts, predictable demand. Debt discipline decided who made it. The frontier has moved to space and energy abundance.', stat: 'AI data center market consolidates to ~8 dominant operators' }
+};
+
+const storyOverlayEl = document.getElementById('story-overlay');
+const storyYearEl = document.getElementById('story-year');
+const storyTitleEl = document.getElementById('story-title');
+const storyHeadlineEl = document.getElementById('story-headline');
+const storyTextEl = document.getElementById('story-text');
+const storyStatEl = document.getElementById('story-stat');
+const storyProgressEl = document.getElementById('story-progress');
+const storyPrevBtn = document.getElementById('story-prev');
+const storyNextBtn = document.getElementById('story-next');
+const storyExitBtn = document.getElementById('story-exit');
+const storyPlayBtn = document.getElementById('story-play');
+const storyModeBtn = document.getElementById('btn-story-mode');
+
+let storyModeActive = false;
+let storyTimer = null;
+
+function renderStoryCard(year) {
+  const ch = STORY_CHAPTERS[year] ?? STORY_CHAPTERS[2019];
+  const entry = timelineEntry(year);
+  const idx = year - 2019;
+  storyYearEl.innerText = String(year);
+  storyTitleEl.innerText = ch.title;
+  storyHeadlineEl.innerText = ch.headline;
+  storyTextEl.innerText = ch.story;
+  storyStatEl.innerText = ch.stat;
+
+  const dots = Array.from({ length: 12 }, (_, i) =>
+    `<span class="story-dot${i === idx ? ' active' : ''}"></span>`
+  ).join('');
+  storyProgressEl.innerHTML = dots;
+
+  storyPrevBtn.disabled = year <= 2019;
+  storyNextBtn.disabled = year >= 2030;
+  storyNextBtn.innerText = year >= 2030 ? 'FINISH' : 'NEXT CHAPTER';
+
+  setTimelineYear(year);
+}
+
+function stopStoryPlayback() {
+  if (storyTimer) { clearInterval(storyTimer); storyTimer = null; }
+  if (storyPlayBtn) storyPlayBtn.innerText = 'AUTO-PLAY';
+}
+
+function startStoryPlayback() {
+  stopStoryPlayback();
+  if (storyPlayBtn) storyPlayBtn.innerText = 'PAUSE';
+  storyTimer = setInterval(() => {
+    if (currentTimelineYear >= 2030) { stopStoryPlayback(); return; }
+    renderStoryCard(currentTimelineYear + 1);
+  }, 3500);
+}
+
+window.enterStoryMode = function() {
+  storyModeActive = true;
+  storyModeBtn.innerText = '[STORY] EXIT STORY';
+  storyOverlayEl.classList.add('show');
+  renderStoryCard(currentTimelineYear);
+};
+
+window.exitStoryMode = function() {
+  storyModeActive = false;
+  storyModeBtn.innerText = '[STORY] STORY MODE';
+  storyOverlayEl.classList.remove('show');
+  stopStoryPlayback();
+};
+
+window.toggleStoryMode = function() {
+  if (storyModeActive) window.exitStoryMode(); else window.enterStoryMode();
+};
+
+if (storyPrevBtn) storyPrevBtn.addEventListener('click', () => { stopStoryPlayback(); renderStoryCard(currentTimelineYear - 1); });
+if (storyNextBtn) storyNextBtn.addEventListener('click', () => {
+  stopStoryPlayback();
+  if (currentTimelineYear >= 2030) { window.exitStoryMode(); return; }
+  renderStoryCard(currentTimelineYear + 1);
+});
+if (storyExitBtn) storyExitBtn.addEventListener('click', window.exitStoryMode);
+if (storyPlayBtn) storyPlayBtn.addEventListener('click', () => { if (storyTimer) stopStoryPlayback(); else startStoryPlayback(); });
+
+// ─── SIMPLIFIED VIEW ────────────────────────────────────────────────────────────
+
+let simplifiedMode = false;
+const simplifiedBtnEl = document.getElementById('btn-simplified');
+
+function simplifiedStatusLabel(status) {
+  if (status === 'Operational') return 'Online';
+  if (status === 'Expansion') return 'Growing';
+  return 'Planned';
+}
+
+function simplifiedRiskLabel(level) {
+  if (level === 'High') return 'High impact';
+  if (level === 'Medium') return 'Moderate impact';
+  return 'Low impact';
+}
+
+function renderSimplifiedInfoHtml(center) {
+  return [
+    `<div style="font-size:13px;color:#adffd8;margin-bottom:10px;">${center.name}</div>`,
+    `<div style="margin-bottom:6px;"><b>Company:</b> ${center.operator}</div>`,
+    `<div style="margin-bottom:6px;"><b>Status:</b> ${simplifiedStatusLabel(center.status)}</div>`,
+    `<div style="margin-bottom:6px;"><b>Energy use:</b> ${center.powerMW} megawatts — enough to power ~${Math.round(center.powerMW * 750).toLocaleString()} homes</div>`,
+    `<div style="margin-bottom:6px;"><b>What it does:</b> ${center.role}</div>`,
+    `<div style="margin-bottom:6px;"><b>AI models hosted here:</b> ${center.models.join(', ')}</div>`,
+    `<div style="margin-bottom:6px;"><b>Cooling method:</b> ${center.cooling}</div>`,
+    `<div style="margin-bottom:6px;"><b>Water usage concern:</b> ${simplifiedRiskLabel(center.waterRisk)}</div>`,
+    `<div style="margin-bottom:6px;"><b>Local jobs:</b> ${center.jobs}</div>`,
+    `<div style="margin-top:10px;opacity:0.55;font-size:9px;">DATA IS CURATED FROM PUBLIC OPERATOR DISCLOSURES.</div>`
+  ].join('');
+}
+
+window.toggleSimplified = function() {
+  simplifiedMode = !simplifiedMode;
+  document.body.classList.toggle('simplified', simplifiedMode);
+  if (simplifiedBtnEl) simplifiedBtnEl.innerText = simplifiedMode ? '[VIEW] EXPERT MODE' : '[VIEW] SIMPLIFIED VIEW';
+  const activeCenter = DATA_CENTERS.find((c) => c.id === activeCenterId);
+  if (activeCenter) {
+    infoPanel.innerHTML = simplifiedMode ? renderSimplifiedInfoHtml(activeCenter) : centerDetailsHtml(activeCenter);
+  }
+};
 
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
   cloudShell.rotation.y += 0.0002;
   globeGroup.rotation.y += 0.00045;
+  starsGroup.rotation.y += 0.00006;
 
-  if (focusPoint) {
-    controls.target.lerp(focusPoint, 0.06);
+  const cameraDistance = camera.position.distanceTo(controls.target);
+  const rawTransition = (cameraDistance - SPACE_ZOOM_START) / (SPACE_ZOOM_FULL - SPACE_ZOOM_START);
+  spaceTransition = THREE.MathUtils.clamp(rawTransition, 0, 1);
+
+  globeGroup.position.set(-5.6 * spaceTransition, -0.22 * spaceTransition, 0);
+  globeGroup.rotation.z = -0.08 * spaceTransition;
+
+  const desiredTarget = (focusPoint ? focusPoint.clone() : new THREE.Vector3(0, 0, 0)).add(globeGroup.position);
+  desiredTarget.x += 2.2 * spaceTransition;
+  desiredTarget.y += 0.2 * spaceTransition;
+  controls.target.lerp(desiredTarget, focusPoint ? 0.065 : 0.08);
+
+  if (starMaterial) {
+    starMaterial.opacity = 0.12 + spaceTransition * 0.86;
+  }
+  if (frontierOverlayEl) {
+    frontierOverlayEl.classList.toggle('show', spaceTransition > 0.28);
+    frontierOverlayEl.style.opacity = (Math.max(0, (spaceTransition - 0.2) / 0.8)).toFixed(3);
   }
 
   renderer.render(scene, camera);
