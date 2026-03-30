@@ -31,6 +31,7 @@ const timelinePlayBtn = document.getElementById('timeline-play');
 const timelineSpeedSelect = document.getElementById('timeline-speed');
 const timelineChartEl = document.getElementById('timeline-chart');
 const timelineDeepDiveEl = document.getElementById('timeline-deepdive');
+const frontierOverlayEl = document.getElementById('frontier-overlay');
 
 let renderer;
 try {
@@ -57,7 +58,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.06;
 controls.minDistance = 2.5;
-controls.maxDistance = 52;
+controls.maxDistance = 70;
 controls.target.set(0, 0, 0);
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.7));
@@ -70,6 +71,8 @@ scene.add(rimLight);
 
 const globeGroup = new THREE.Group();
 scene.add(globeGroup);
+const starsGroup = new THREE.Group();
+scene.add(starsGroup);
 
 const globeRadius = 2;
 const earthTexture = new THREE.TextureLoader().load(earthTextureUrl);
@@ -108,6 +111,28 @@ const atmosphere = new THREE.Mesh(
   })
 );
 globeGroup.add(atmosphere);
+
+const starCount = 2800;
+const starPositions = new Float32Array(starCount * 3);
+for (let i = 0; i < starCount; i += 1) {
+  const radius = 160 + Math.random() * 260;
+  const theta = Math.random() * Math.PI * 2;
+  const phi = Math.acos(2 * Math.random() - 1);
+  starPositions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+  starPositions[i * 3 + 1] = radius * Math.cos(phi);
+  starPositions[i * 3 + 2] = radius * Math.sin(phi) * Math.sin(theta);
+}
+const starGeometry = new THREE.BufferGeometry();
+starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+const starMaterial = new THREE.PointsMaterial({
+  color: 0xcde6ff,
+  size: 0.95,
+  transparent: true,
+  opacity: 0.15,
+  depthWrite: false
+});
+const starField = new THREE.Points(starGeometry, starMaterial);
+starsGroup.add(starField);
 
 function latLonToVector3(lat, lon, radius) {
   const phi = (90 - lat) * (Math.PI / 180);
@@ -406,6 +431,10 @@ let pointerDownPos = null;
 let draggedSincePointerDown = false;
 let currentTimelineYear = 2019;
 let timelineTimer = null;
+let spaceTransition = 0;
+
+const SPACE_ZOOM_START = 14;
+const SPACE_ZOOM_FULL = 36;
 
 controls.addEventListener('start', () => {
   draggedSincePointerDown = true;
@@ -828,9 +857,26 @@ function animate() {
   controls.update();
   cloudShell.rotation.y += 0.0002;
   globeGroup.rotation.y += 0.00045;
+  starsGroup.rotation.y += 0.00006;
 
-  if (focusPoint) {
-    controls.target.lerp(focusPoint, 0.06);
+  const cameraDistance = camera.position.distanceTo(controls.target);
+  const rawTransition = (cameraDistance - SPACE_ZOOM_START) / (SPACE_ZOOM_FULL - SPACE_ZOOM_START);
+  spaceTransition = THREE.MathUtils.clamp(rawTransition, 0, 1);
+
+  globeGroup.position.set(-5.6 * spaceTransition, -0.22 * spaceTransition, 0);
+  globeGroup.rotation.z = -0.08 * spaceTransition;
+
+  const desiredTarget = (focusPoint ? focusPoint.clone() : new THREE.Vector3(0, 0, 0)).add(globeGroup.position);
+  desiredTarget.x += 2.2 * spaceTransition;
+  desiredTarget.y += 0.2 * spaceTransition;
+  controls.target.lerp(desiredTarget, focusPoint ? 0.065 : 0.08);
+
+  if (starMaterial) {
+    starMaterial.opacity = 0.12 + spaceTransition * 0.86;
+  }
+  if (frontierOverlayEl) {
+    frontierOverlayEl.classList.toggle('show', spaceTransition > 0.28);
+    frontierOverlayEl.style.opacity = (Math.max(0, (spaceTransition - 0.2) / 0.8)).toFixed(3);
   }
 
   renderer.render(scene, camera);

@@ -67,6 +67,12 @@
         button { background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 12px 20px; cursor: pointer; font-family: inherit; font-size: 10px; transition: all 0.2s; text-align: left; }
         button:hover { border-color: #fff; background: #111; }
         
+        #frontier-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 35; text-align: center; opacity: 0; pointer-events: none; transition: opacity 0.45s ease; }
+        #frontier-overlay.show { opacity: 1; }
+        .frontier-kicker { font-size: 11px; letter-spacing: 0.18em; color: #9bc8ff; opacity: 0.8; }
+        .frontier-title { font-size: 44px; letter-spacing: 0.1em; color: #f3fbff; margin: 4px 0; text-shadow: 0 0 20px rgba(167, 211, 255, 0.35); }
+        .frontier-sub { font-size: 10px; letter-spacing: 0.08em; opacity: 0.9; }
+
         #hint { position: absolute; bottom: 24px; right: 24px; font-size: 9px; opacity: 0.3; }
         canvas { display: block; }
 
@@ -178,7 +184,13 @@
         <button onclick="window.location.reload()">[CMD] REBOOT TERMINAL</button>
     </div>
 
-    <div id="hint">MOUSE_LEFT: ROTATE // SCROLL: ZOOM // CLICK: SELECT_NODE (LARGE HIT AREA)</div>
+    <div id="frontier-overlay">
+        <div class="frontier-kicker">THE NEXT FRONTIER</div>
+        <div class="frontier-title">SPACE</div>
+        <div class="frontier-sub">COOLED BY THE VOID, POWERED BY THE SUN.</div>
+    </div>
+
+    <div id="hint">MOUSE_LEFT: ROTATE // SCROLL: ZOOM (PULL FAR OUT FOR SPACE VIEW) // CLICK: SELECT_NODE (LARGE HIT AREA)</div>
     <script type="module" src="./main.js"></script>
 </body>
 </html>
