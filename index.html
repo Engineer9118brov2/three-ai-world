@@ -15,71 +15,50 @@
         }
 
         body { margin: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font-mono); text-transform: uppercase; font-size: 12px; letter-spacing: 0.05em; }
-        #ticker { width: 100%; height: 32px; background: var(--surface); border-bottom: 1px solid var(--border); position: absolute; top: 0; display: flex; align-items: center; overflow: hidden; white-space: nowrap; font-size: 10px; z-index: 100; }
-        .ticker-item { margin-right: 60px; animation: scroll 30s linear infinite; }
-        @keyframes scroll { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
         
-        #header { position: absolute; top: 48px; left: 24px; border-left: 1px solid #fff; padding-left: 16px; z-index: 50; }
+        #header { position: absolute; top: 24px; left: 24px; border-left: 1px solid #fff; padding-left: 16px; z-index: 50; }
         h1 { font-size: 16px; margin: 0; font-weight: 500; }
         .version { font-size: 9px; opacity: 0.4; margin-top: 4px; display: block; }
 
-        #news-terminal { position: absolute; top: 120px; right: 24px; width: 300px; background: var(--surface); border: 1px solid var(--border); padding: 16px; z-index: 50; }
-        .news-header { font-size: 9px; opacity: 0.4; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-        #news-content { font-size: 11px; line-height: 1.6; color: var(--accent); }
-
-        #ctrl-btns { position: absolute; top: 120px; left: 24px; z-index: 50; display: flex; flex-direction: column; gap: 8px; }
-        #stats-bar { position: absolute; top: 48px; left: 50%; transform: translateX(-50%); display: flex; gap: 32px; background: var(--surface); padding: 12px 24px; border: 1px solid var(--border); z-index: 50; }
-        .stat-item { text-align: left; }
-        .stat-val { font-size: 18px; font-weight: 600; display: block; }
-        .stat-label { font-size: 8px; opacity: 0.4; margin-top: 4px; }
-
-        #info-panel { position: absolute; bottom: 120px; right: 24px; background: var(--surface); padding: 20px; border: 1px solid var(--border); width: 280px; z-index: 50; line-height: 1.6; }
-        #ui { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); text-align: center; width: 80%; z-index: 50; }
+        #info-panel { position: absolute; top: 24px; right: 24px; background: var(--surface); padding: 20px; border: 1px solid var(--border); width: 280px; z-index: 50; line-height: 1.6; min-height: 100px; }
         
-        button { background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 10px 16px; cursor: pointer; font-family: inherit; font-size: 10px; transition: all 0.2s; text-align: left; }
-        button:hover { background: var(--text); color: var(--bg); }
+        #ctrl-btns { position: absolute; bottom: 24px; left: 24px; z-index: 50; display: flex; flex-direction: column; gap: 8px; }
         
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 1px; background: var(--border); }
-        input[type=range]::-webkit-slider-thumb { height: 12px; width: 12px; background: #fff; border-radius: 0; -webkit-appearance: none; margin-top: -6px; cursor: pointer; }
+        button { background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 12px 20px; cursor: pointer; font-family: inherit; font-size: 10px; transition: all 0.2s; text-align: left; }
+        button:hover { border-color: #fff; background: #111; }
+        
+        #hint { position: absolute; bottom: 24px; right: 24px; font-size: 9px; opacity: 0.3; }
+
+        /* Scrollbar hide */
+        ::-webkit-scrollbar { display: none; }
     </style>
-  <script type="module" crossorigin src="/three-ai-world/assets/index-DJHqJ9io.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/examples/jsm/controls/OrbitControls": "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js"
+            }
+        }
+    </script>
+  <script type="module" crossorigin src="/three-ai-world/assets/index-CcZugoHf.js"></script>
 </head>
 <body>
-    <div id="ticker">
-        <div class="ticker-item">NVDA $167.00 (-10.0%) // MSFT $357.00 // GOOGL $274.00 // THE AI DEBT LOOP IS ACCELERATING // [TRUTH]: MONEY FLOWS IN CIRCLES</div>
-    </div>
-
     <div id="header">
         <h1>AI NEXUS // CONDUCTOR</h1>
-        <span class="version">TERMINAL VER. 6.1 // POINT CLOUD MAPPING ACTIVE</span>
-    </div>
-
-    <div id="news-terminal">
-        <div class="news-header">SIGNAL_DECRYPTION_FEED // LIVE</div>
-        <div id="news-content">BOOTING_UP...</div>
-    </div>
-
-    <div id="ctrl-btns">
-        <button onclick="toggleLoop()">[MODE] TOGGLE MONEY LOOP</button>
-        <button onclick="startSequence()">[EXE] INITIATE GUIDED SEQUENCE</button>
-    </div>
-
-    <div id="stats-bar">
-        <div class="stat-item">
-            <span class="stat-label">TOTAL LOAD</span>
-            <span id="total-power" class="stat-val">0 MW</span>
-        </div>
+        <span class="version">TERMINAL VER. 7.0 // ORBIT_PROTOCOL ACTIVE</span>
     </div>
 
     <div id="info-panel">
-        [SYSTEM ONLINE] INFRASTRUCTURE TRACKER ACTIVE.
+        [SYSTEM ONLINE]<br>CLICK A GLOBAL NODE TO INITIALIZE DATA STREAM.
     </div>
 
-    <div id="ui">
-        <div id="date-label">2024-01</div>
-        <input type="range" min="0" max="9" value="0" oninput="updateTimeline(this.value)">
+    <div id="ctrl-btns">
+        <button onclick="toggleLoop()">[MODE] TOGGLE MONEY LOOP (ANIMATED)</button>
+        <button onclick="window.location.reload()">[CMD] REBOOT TERMINAL</button>
     </div>
+
+    <div id="hint">MOUSE_LEFT: ROTATE // SCROLL: ZOOM // CLICK: SELECT_NODE</div>
     
+
 </body>
 </html>
