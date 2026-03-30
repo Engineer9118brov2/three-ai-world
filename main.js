@@ -45,7 +45,7 @@ const globeRadius = 2;
 globeGroup.add(
   new THREE.Mesh(
     new THREE.SphereGeometry(globeRadius, 48, 48),
-    new THREE.MeshBasicMaterial({ color: 0x080808 })
+    new THREE.MeshBasicMaterial({ color: 0x030303 })
   )
 );
 
@@ -53,10 +53,10 @@ globeGroup.add(
   new THREE.Mesh(
     new THREE.SphereGeometry(globeRadius * 0.994, 36, 36),
     new THREE.MeshBasicMaterial({
-      color: 0x121212,
+      color: 0x0a0a0a,
       wireframe: true,
       transparent: true,
-      opacity: 0.16
+      opacity: 0.1
     })
   )
 );
@@ -81,14 +81,21 @@ function pseudoNoise(a, b) {
 
 function createProceduralLandPoints() {
   const positions = [];
-  for (let lat = -84; lat <= 84; lat += 2.2) {
-    for (let lon = -180; lon <= 180; lon += 2.2) {
+  const haloPositions = [];
+  for (let lat = -84; lat <= 84; lat += 1.7) {
+    for (let lon = -180; lon <= 180; lon += 1.7) {
       const latRad = (lat * Math.PI) / 180;
       const lonRad = (lon * Math.PI) / 180;
-      const landScore = pseudoNoise(latRad, lonRad) - (Math.abs(lat) / 90) * 0.34;
-      if (landScore > 0.04) {
-        const point = latLonToVector3(lat, lon, globeRadius + 0.02);
+      const landScore =
+        pseudoNoise(latRad, lonRad) -
+        (Math.abs(lat) / 90) * 0.3 +
+        Math.cos(latRad * 2.1) * 0.05;
+
+      if (landScore > 0.02) {
+        const point = latLonToVector3(lat, lon, globeRadius + 0.03);
         positions.push(point.x, point.y, point.z);
+        const haloPoint = latLonToVector3(lat, lon, globeRadius + 0.038);
+        haloPositions.push(haloPoint.x, haloPoint.y, haloPoint.z);
       }
     }
   }
@@ -96,11 +103,25 @@ function createProceduralLandPoints() {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
   const material = new THREE.PointsMaterial({
-    color: 0xffffff,
-    size: 0.013,
+    color: 0xf2fff8,
+    size: 0.018,
     sizeAttenuation: true
   });
-  return new THREE.Points(geometry, material);
+
+  const haloGeometry = new THREE.BufferGeometry();
+  haloGeometry.setAttribute('position', new THREE.Float32BufferAttribute(haloPositions, 3));
+  const haloMaterial = new THREE.PointsMaterial({
+    color: 0x60ffbf,
+    size: 0.028,
+    transparent: true,
+    opacity: 0.28,
+    sizeAttenuation: true
+  });
+
+  const group = new THREE.Group();
+  group.add(new THREE.Points(geometry, material));
+  group.add(new THREE.Points(haloGeometry, haloMaterial));
+  return group;
 }
 
 globeGroup.add(createProceduralLandPoints());
