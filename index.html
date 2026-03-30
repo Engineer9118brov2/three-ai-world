@@ -23,17 +23,15 @@
         h1 { font-size: 16px; margin: 0; font-weight: 500; }
         .version { font-size: 9px; opacity: 0.4; margin-top: 4px; display: block; }
 
-        #ctrl-btns { position: absolute; top: 120px; left: 24px; z-index: 50; display: flex; flex-direction: column; gap: 8px; }
-        #loop-status { font-size: 10px; color: var(--accent); margin-bottom: 4px; display: block; }
+        #news-terminal { position: absolute; top: 120px; right: 24px; width: 300px; background: var(--surface); border: 1px solid var(--border); padding: 16px; z-index: 50; }
+        .news-header { font-size: 9px; opacity: 0.4; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+        #news-content { font-size: 11px; line-height: 1.6; color: var(--accent); }
 
+        #ctrl-btns { position: absolute; top: 120px; left: 24px; z-index: 50; display: flex; flex-direction: column; gap: 8px; }
         #stats-bar { position: absolute; top: 48px; left: 50%; transform: translateX(-50%); display: flex; gap: 32px; background: var(--surface); padding: 12px 24px; border: 1px solid var(--border); z-index: 50; }
         .stat-item { text-align: left; }
         .stat-val { font-size: 18px; font-weight: 600; display: block; }
         .stat-label { font-size: 8px; opacity: 0.4; margin-top: 4px; }
-
-        #bubble-gauge { position: absolute; top: 48px; right: 24px; border: 1px solid var(--border); padding: 12px; width: 180px; background: var(--surface); z-index: 50; }
-        .gauge-bar { width: 100%; height: 2px; background: #1a1a1a; margin-top: 8px; }
-        .gauge-fill { height: 100%; background: var(--danger); width: 85%; }
 
         #info-panel { position: absolute; bottom: 120px; right: 24px; background: var(--surface); padding: 20px; border: 1px solid var(--border); width: 280px; z-index: 50; line-height: 1.6; }
         #ui { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); text-align: center; width: 80%; z-index: 50; }
@@ -41,25 +39,28 @@
         button { background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 10px 16px; cursor: pointer; font-family: inherit; font-size: 10px; transition: all 0.2s; text-align: left; }
         button:hover { background: var(--text); color: var(--bg); }
         
-        #space-alert { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; opacity: 0; transition: opacity 1s; pointer-events: none; border: 1px solid var(--border); padding: 60px; background: var(--surface); z-index: 10; }
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 1px; background: var(--border); }
         input[type=range]::-webkit-slider-thumb { height: 12px; width: 12px; background: #fff; border-radius: 0; -webkit-appearance: none; margin-top: -6px; cursor: pointer; }
     </style>
-  <script type="module" crossorigin src="/three-ai-world/assets/index-CDgS5bVZ.js"></script>
+  <script type="module" crossorigin src="/three-ai-world/assets/index-DJHqJ9io.js"></script>
 </head>
 <body>
     <div id="ticker">
-        <div class="ticker-item">NVDA $167.00 (-10.0%) // MSFT $357.00 // GOOGL $274.00 // AMZN $199.00 // THE AI DEBT LOOP IS ACCELERATING // MARGIN CALL: 0.85 // [TRUTH]: MONEY FLOWS IN CIRCLES</div>
+        <div class="ticker-item">NVDA $167.00 (-10.0%) // MSFT $357.00 // GOOGL $274.00 // THE AI DEBT LOOP IS ACCELERATING // [TRUTH]: MONEY FLOWS IN CIRCLES</div>
     </div>
 
     <div id="header">
         <h1>AI NEXUS // CONDUCTOR</h1>
-        <span class="version">TERMINAL VER. 5.2 // STORY SEQUENCE READY</span>
+        <span class="version">TERMINAL VER. 6.1 // POINT CLOUD MAPPING ACTIVE</span>
+    </div>
+
+    <div id="news-terminal">
+        <div class="news-header">SIGNAL_DECRYPTION_FEED // LIVE</div>
+        <div id="news-content">BOOTING_UP...</div>
     </div>
 
     <div id="ctrl-btns">
-        <span id="loop-status">LOOP_LAYER: NULL</span>
         <button onclick="toggleLoop()">[MODE] TOGGLE MONEY LOOP</button>
         <button onclick="startSequence()">[EXE] INITIATE GUIDED SEQUENCE</button>
     </div>
@@ -71,23 +72,13 @@
         </div>
     </div>
 
-    <div id="bubble-gauge">
-        <div style="font-size: 9px; opacity: 0.6;">BUBBLE INTENSITY // 85%</div>
-        <div class="gauge-bar"><div class="gauge-fill"></div></div>
-    </div>
-
     <div id="info-panel">
-        [SYSTEM ONLINE]<br>SELECT TIMELINE SEQUENCE OR INITIATE GUIDED EXE.
-    </div>
-
-    <div id="space-alert">
-        <h1>THE NEXT FRONTIER: SPACE</h1>
-        <p>Cooled by the void. Powered by the sun.</p>
+        [SYSTEM ONLINE] INFRASTRUCTURE TRACKER ACTIVE.
     </div>
 
     <div id="ui">
         <div id="date-label">2024-01</div>
-        <input type="range" min="0" max="11" value="0" oninput="updateTimeline(this.value)">
+        <input type="range" min="0" max="9" value="0" oninput="updateTimeline(this.value)">
     </div>
     
 </body>
