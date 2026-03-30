@@ -446,6 +446,7 @@ const SPACE_ZOOM_FULL = 36;
 controls.addEventListener('start', () => {
   draggedSincePointerDown = true;
   suppressClickUntil = performance.now() + 120;
+  focusPoint = null;
 });
 
 window.addEventListener('pointerdown', (event) => {
@@ -1029,11 +1030,24 @@ function animate() {
   globeGroup.position.set(-5.6 * spaceTransition, 0.45 - 0.22 * spaceTransition, 0);
   globeGroup.rotation.z = -0.08 * spaceTransition;
 
-  const desiredTarget = (focusPoint ? focusPoint.clone() : new THREE.Vector3(0, 0, 0)).add(globeGroup.position);
-  desiredTarget.x += 2.2 * spaceTransition;
-  // Keep the target point lower than the globe's center to shift the globe UP in the viewport
-  desiredTarget.y -= 0.38;
-  controls.target.lerp(desiredTarget, focusPoint ? 0.065 : 0.08);
+  const globeCenterWithOffset = globeGroup.position.clone();
+  globeCenterWithOffset.x += 2.2 * spaceTransition;
+  globeCenterWithOffset.y -= 0.38;
+
+  // Always center target on the globe (with previous offset)
+  controls.target.lerp(globeCenterWithOffset, 0.08);
+
+  if (focusPoint) {
+    // Spin the globe to the area: Rotate camera to face the marker relative to globe center
+    // We calculate marker position in world space by adding it to globeGroup.position
+    // But markers are children of globeGroup, so they already rotate with it.
+    // However, focusPoint is static from latLonToVector3.
+    // To 'spin' to it, we need the camera to move to focusPoint's direction relative to globe center.
+    const dir = focusPoint.clone().applyQuaternion(globeGroup.quaternion).normalize();
+    const dist = camera.position.distanceTo(globeCenterWithOffset);
+    const desiredCameraPos = globeCenterWithOffset.clone().add(dir.multiplyScalar(dist));
+    camera.position.lerp(desiredCameraPos, 0.05);
+  }
 
   if (starMaterial) {
     starMaterial.opacity = 0.12 + spaceTransition * 0.86;
