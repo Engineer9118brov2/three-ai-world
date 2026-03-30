@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Impact Tracker</title>
+    <title>AI Global Impact Dashboard</title>
     <style>
         body { margin: 0; overflow: hidden; background: #020205; color: white; font-family: sans-serif; }
         #ui { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); text-align: center; width: 80%; }
-        #info-panel { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 20px; border-radius: 12px; border: 1px solid #333; width: 250px; }
+        #info-panel { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.85); padding: 20px; border-radius: 12px; border: 1px solid #444; width: 280px; }
+        #stats-bar { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 40px; background: rgba(0,0,0,0.6); padding: 15px 30px; border-radius: 30px; border: 1px solid #333; }
+        .stat-item { text-align: center; }
+        .stat-val { font-size: 24px; font-weight: bold; color: #ff3300; }
+        .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; }
         input { width: 100%; cursor: pointer; accent-color: #ff3300; }
         #header { position: absolute; top: 20px; left: 20px; }
         .impact-red { color: #ff3300; font-weight: bold; }
@@ -14,14 +18,27 @@
 <body>
     <div id="header">
         <h1>Global AI Impact</h1>
-        <p>Tracking the <span class="impact-red">Environmental Cost</span> of Artificial Intelligence.</p>
+        <p>The <span class="impact-red">Physical Footprint</span> of Intelligence.</p>
     </div>
+
+    <div id="stats-bar">
+        <div class="stat-item">
+            <div id="total-power" class="stat-val">0 MW</div>
+            <div class="stat-label">Total Power Demand</div>
+        </div>
+        <div class="stat-item">
+            <div id="total-water" class="stat-val">0 M Gal</div>
+            <div class="stat-label">Total Water Usage</div>
+        </div>
+    </div>
+
     <div id="info-panel">
-        <p>Select a date on the timeline to see facility impact data.</p>
+        <p>Select a date to track the expansion.</p>
     </div>
+
     <div id="ui">
         <h2 id="date-label">2024-01</h2>
-        <input type="range" min="0" max="9" value="0" oninput="updateTimeline(this.value)">
+        <input type="range" min="0" max="14" value="0" oninput="updateTimeline(this.value)">
     </div>
     <script type="module" src="/main.js"></script>
 </body>
