@@ -1026,12 +1026,13 @@ function animate() {
   const rawTransition = (cameraDistance - SPACE_ZOOM_START) / (SPACE_ZOOM_FULL - SPACE_ZOOM_START);
   spaceTransition = THREE.MathUtils.clamp(rawTransition, 0, 1);
 
-  globeGroup.position.set(-5.6 * spaceTransition, -0.22 * spaceTransition, 0);
+  globeGroup.position.set(-5.6 * spaceTransition, 0.45 - 0.22 * spaceTransition, 0);
   globeGroup.rotation.z = -0.08 * spaceTransition;
 
   const desiredTarget = (focusPoint ? focusPoint.clone() : new THREE.Vector3(0, 0, 0)).add(globeGroup.position);
   desiredTarget.x += 2.2 * spaceTransition;
-  desiredTarget.y += 0.2 * spaceTransition;
+  // Keep the target point lower than the globe's center to shift the globe UP in the viewport
+  desiredTarget.y -= 0.38;
   controls.target.lerp(desiredTarget, focusPoint ? 0.065 : 0.08);
 
   if (starMaterial) {
