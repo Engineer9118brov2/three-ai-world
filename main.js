@@ -27,6 +27,9 @@ const timelineDescEl = document.getElementById('timeline-desc');
 const timelineSlider = document.getElementById('timeline-slider');
 const timelinePrevBtn = document.getElementById('timeline-prev');
 const timelineNextBtn = document.getElementById('timeline-next');
+const timelinePlayBtn = document.getElementById('timeline-play');
+const timelineSpeedSelect = document.getElementById('timeline-speed');
+const timelineChartEl = document.getElementById('timeline-chart');
 
 let renderer;
 try {
@@ -189,6 +192,21 @@ const TIMELINE = [
   { year: 2028, phase: 'EFFICIENCY WARS', desc: 'Model compression and inference efficiency reduce spend per output; weaker facilities struggle to stay full.' },
   { year: 2029, phase: 'RESET OR RE-ACCELERATION', desc: 'Market bifurcates: high-utilization operators compound, over-levered players cut capex aggressively.' },
   { year: 2030, phase: 'NEW BASELINE', desc: 'AI infrastructure matures into utility-like economics for winners; debt discipline decides survivorship.' }
+];
+
+const TIMELINE_METRICS = [
+  { year: 2019, capex: 18, debt: 22, bubble: 16, util: 74, powerInflation: 2, growth: 9, rateShock: 0.1 },
+  { year: 2020, capex: 23, debt: 27, bubble: 20, util: 77, powerInflation: 4, growth: 14, rateShock: 0.2 },
+  { year: 2021, capex: 31, debt: 34, bubble: 27, util: 81, powerInflation: 7, growth: 18, rateShock: 0.4 },
+  { year: 2022, capex: 43, debt: 48, bubble: 39, util: 86, powerInflation: 10, growth: 28, rateShock: 0.8 },
+  { year: 2023, capex: 57, debt: 64, bubble: 53, util: 88, powerInflation: 16, growth: 31, rateShock: 1.2 },
+  { year: 2024, capex: 71, debt: 79, bubble: 62, util: 85, powerInflation: 18, growth: 24, rateShock: 1.5 },
+  { year: 2025, capex: 83, debt: 94, bubble: 67, util: 79, powerInflation: 22, growth: 17, rateShock: 2.0 },
+  { year: 2026, capex: 88, debt: 107, bubble: 73, util: 73, powerInflation: 27, growth: 10, rateShock: 2.6 },
+  { year: 2027, capex: 82, debt: 112, bubble: 78, util: 68, powerInflation: 33, growth: 6, rateShock: 3.1 },
+  { year: 2028, capex: 74, debt: 110, bubble: 70, util: 71, powerInflation: 25, growth: 9, rateShock: 2.4 },
+  { year: 2029, capex: 69, debt: 104, bubble: 64, util: 75, powerInflation: 19, growth: 12, rateShock: 1.8 },
+  { year: 2030, capex: 66, debt: 98, bubble: 58, util: 78, powerInflation: 14, growth: 14, rateShock: 1.2 }
 ];
 
 const DATA_CENTERS = [
@@ -371,6 +389,7 @@ let focusPoint = null;
 let pointerDownPos = null;
 let draggedSincePointerDown = false;
 let currentTimelineYear = 2019;
+let timelineTimer = null;
 
 controls.addEventListener('start', () => {
   draggedSincePointerDown = true;
@@ -532,6 +551,41 @@ function updateBubbleLab() {
   `;
 }
 
+function timelineMetrics(year) {
+  return TIMELINE_METRICS.find((item) => item.year === year) ?? TIMELINE_METRICS[0];
+}
+
+function syncBubbleToTimeline(year) {
+  const m = timelineMetrics(year);
+  rateShockInput.value = m.rateShock.toFixed(1);
+  utilizationInput.value = String(m.util);
+  powerInflationInput.value = String(m.powerInflation);
+  revenueGrowthInput.value = String(m.growth);
+}
+
+function renderTimelineChart() {
+  const width = 288;
+  const height = 80;
+  const maxY = 120;
+  const x = (idx) => (idx / (TIMELINE_METRICS.length - 1)) * (width - 8) + 4;
+  const y = (val) => height - ((val / maxY) * (height - 12) + 6);
+
+  const pathFor = (key) =>
+    TIMELINE_METRICS.map((row, idx) => `${idx === 0 ? 'M' : 'L'}${x(idx).toFixed(1)},${y(row[key]).toFixed(1)}`).join(' ');
+
+  const currentIdx = TIMELINE_METRICS.findIndex((row) => row.year === currentTimelineYear);
+  const cx = currentIdx >= 0 ? x(currentIdx).toFixed(1) : '4';
+
+  timelineChartEl.innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" preserveAspectRatio="none">
+      <path d="${pathFor('capex')}" fill="none" stroke="#7ef0c2" stroke-width="1.8" />
+      <path d="${pathFor('debt')}" fill="none" stroke="#ffbf7f" stroke-width="1.6" />
+      <path d="${pathFor('bubble')}" fill="none" stroke="#ff7676" stroke-width="1.6" />
+      <line x1="${cx}" y1="4" x2="${cx}" y2="${height - 4}" stroke="#ffffff55" stroke-width="1" />
+    </svg>
+  `;
+}
+
 function timelineEntry(year) {
   return TIMELINE.find((item) => item.year === year) ?? TIMELINE[0];
 }
@@ -566,6 +620,9 @@ function setTimelineYear(year) {
   timelineDescEl.innerText = entry.desc;
   timelineSlider.value = String(clamped);
 
+  syncBubbleToTimeline(clamped);
+  updateBubbleLab();
+  renderTimelineChart();
   applyTimelineVisibility();
 }
 
@@ -639,6 +696,39 @@ timelinePrevBtn.addEventListener('click', () => {
 
 timelineNextBtn.addEventListener('click', () => {
   setTimelineYear(currentTimelineYear + 1);
+});
+
+function stopTimelinePlayback() {
+  if (timelineTimer) {
+    clearInterval(timelineTimer);
+    timelineTimer = null;
+  }
+  timelinePlayBtn.innerText = 'PLAY';
+}
+
+function startTimelinePlayback() {
+  stopTimelinePlayback();
+  timelinePlayBtn.innerText = 'PAUSE';
+  const speed = Number.parseInt(timelineSpeedSelect.value, 10) || 1300;
+  timelineTimer = setInterval(() => {
+    if (currentTimelineYear >= 2030) {
+      stopTimelinePlayback();
+      return;
+    }
+    setTimelineYear(currentTimelineYear + 1);
+  }, speed);
+}
+
+timelinePlayBtn.addEventListener('click', () => {
+  if (timelineTimer) {
+    stopTimelinePlayback();
+  } else {
+    startTimelinePlayback();
+  }
+});
+
+timelineSpeedSelect.addEventListener('change', () => {
+  if (timelineTimer) startTimelinePlayback();
 });
 
 [rateShockInput, utilizationInput, powerInflationInput, revenueGrowthInput].forEach((input) => {

@@ -31,6 +31,11 @@
         #timeline-slider { width: 100%; }
         #timeline-row { display: flex; gap: 6px; margin-top: 8px; }
         #timeline-row button { flex: 1; padding: 8px 10px; font-size: 9px; }
+        #timeline-play-row { display: flex; gap: 6px; margin-top: 6px; align-items: center; }
+        #timeline-play-row button { flex: 1; padding: 8px 10px; font-size: 9px; }
+        #timeline-speed { flex: 1; background: #070707; color: #fff; border: 1px solid var(--border); padding: 7px; font: inherit; font-size: 9px; }
+        #timeline-chart { margin-top: 8px; border: 1px solid #273129; padding: 6px; background: #050505; }
+        .timeline-legend { display: flex; gap: 8px; font-size: 8px; opacity: 0.75; margin-top: 4px; }
         #bubble-panel { position: absolute; bottom: 24px; right: 24px; width: 360px; max-height: 44vh; overflow: auto; background: rgba(8,8,8,0.95); border: 1px solid var(--border); padding: 12px; z-index: 50; }
         .bubble-control { margin-bottom: 8px; font-size: 9px; }
         .bubble-control label { display: flex; justify-content: space-between; margin-bottom: 4px; opacity: 0.85; }
@@ -106,6 +111,20 @@
         <div id="timeline-row">
             <button id="timeline-prev">PREV YEAR</button>
             <button id="timeline-next">NEXT YEAR</button>
+        </div>
+        <div id="timeline-play-row">
+            <button id="timeline-play">PLAY</button>
+            <select id="timeline-speed">
+                <option value="1300">SPEED 1X</option>
+                <option value="800">SPEED 1.6X</option>
+                <option value="500">SPEED 2.6X</option>
+            </select>
+        </div>
+        <div id="timeline-chart"></div>
+        <div class="timeline-legend">
+            <span>CAPEX INDEX</span>
+            <span>DEBT INDEX</span>
+            <span>BUBBLE INDEX</span>
         </div>
         <div id="timeline-desc">EARLY GPU SCARCITY, MODEST DEBT LOADS, EXPERIMENTAL MODEL ECONOMICS.</div>
     </div>
