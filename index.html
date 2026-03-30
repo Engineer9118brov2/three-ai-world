@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI NEXUS // CONDUCTOR TERMINAL</title>
+    <title>AI NEXUS // TERMINAL</title>
     <style>
         :root {
             --bg: #000000;
@@ -21,31 +21,25 @@
 
         body { margin: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font-mono); text-transform: uppercase; font-size: 12px; letter-spacing: 0.05em; }
 
+        /* ── HEADER ──────────────────────────────────────────────────────────── */
         #header { position: absolute; top: 24px; left: 24px; border-left: 1px solid #fff; padding-left: 16px; z-index: 50; }
         h1 { font-size: 16px; margin: 0; font-weight: 500; }
         .version { font-size: 9px; opacity: 0.4; margin-top: 4px; display: block; }
 
-        #info-panel { position: absolute; top: 24px; right: 24px; background: var(--surface); padding: 16px; border: 1px solid var(--border); width: 360px; z-index: 50; line-height: 1.5; max-height: 76vh; overflow: auto; }
-        #catalog-panel { position: absolute; top: 106px; left: 24px; width: 360px; max-height: 62vh; overflow: auto; background: rgba(10,10,10,0.94); border: 1px solid var(--border); padding: 12px; z-index: 50; }
-        #stats-panel { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); background: rgba(10,10,10,0.9); border: 1px solid var(--border); padding: 10px 14px; z-index: 50; display: flex; gap: 16px; font-size: 10px; }
-        #timeline-panel { position: absolute; top: 106px; left: 398px; width: 320px; background: rgba(8,8,8,0.95); border: 1px solid var(--border); padding: 12px; z-index: 50; }
-        #timeline-year { font-size: 20px; color: #9cf3cb; font-weight: 600; margin: 4px 0; }
-        #timeline-phase { font-size: 10px; opacity: 0.8; margin-bottom: 8px; }
-        #timeline-desc { font-size: 9px; line-height: 1.45; opacity: 0.85; margin-top: 8px; }
-        #timeline-slider { width: 100%; }
-        #timeline-row { display: flex; gap: 6px; margin-top: 8px; }
-        #timeline-row button { flex: 1; padding: 8px 10px; font-size: 9px; }
-        #timeline-play-row { display: flex; gap: 6px; margin-top: 6px; align-items: center; }
-        #timeline-play-row button { flex: 1; padding: 8px 10px; font-size: 9px; }
-        #timeline-speed { flex: 1; background: #070707; color: #fff; border: 1px solid var(--border); padding: 7px; font: inherit; font-size: 9px; }
-        #timeline-chart { margin-top: 8px; border: 1px solid #273129; padding: 6px; background: #050505; }
-        .timeline-legend { display: flex; gap: 8px; font-size: 8px; opacity: 0.75; margin-top: 4px; }
-        .timeline-legend span:nth-child(1)::before { content: '■ '; color: var(--chart-capex); }
-        .timeline-legend span:nth-child(2)::before { content: '■ '; color: var(--chart-debt); }
-        .timeline-legend span:nth-child(3)::before { content: '■ '; color: var(--chart-bubble); }
-        #timeline-deepdive { margin-top: 8px; border: 1px solid #273129; background: #070707; padding: 8px; font-size: 9px; line-height: 1.45; }
-        .deep-label { color: var(--deep-label-color); opacity: 0.9; }
-        #bubble-panel { position: absolute; bottom: 24px; right: 24px; width: 360px; max-height: 44vh; overflow: auto; background: rgba(8,8,8,0.95); border: 1px solid var(--border); padding: 12px; z-index: 50; }
+        /* ── STATS + CTRL BUTTONS (top center stack) ─────────────────────────── */
+        #top-center { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        #stats-panel { background: rgba(10,10,10,0.9); border: 1px solid var(--border); padding: 10px 14px; display: flex; gap: 16px; font-size: 10px; white-space: nowrap; }
+        #ctrl-btns { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+        #ctrl-btns button { padding: 5px 10px; font-size: 9px; white-space: nowrap; }
+
+        /* ── CATALOG (left) ──────────────────────────────────────────────────── */
+        #catalog-panel { position: absolute; top: 106px; left: 24px; width: 260px; max-height: 66vh; overflow: auto; background: rgba(10,10,10,0.94); border: 1px solid var(--border); padding: 12px; z-index: 50; }
+
+        /* ── INFO PANEL (top-right) ──────────────────────────────────────────── */
+        #info-panel { position: absolute; top: 24px; right: 24px; background: var(--surface); padding: 16px; border: 1px solid var(--border); width: 300px; z-index: 50; line-height: 1.5; max-height: 44vh; overflow: auto; }
+
+        /* ── BUBBLE PANEL (right, below info, collapsible) ───────────────────── */
+        #bubble-panel { position: absolute; top: calc(24px + 44vh + 16px); right: 24px; width: 300px; max-height: 48vh; overflow: auto; background: rgba(8,8,8,0.95); border: 1px solid var(--border); padding: 12px; z-index: 50; }
         .bubble-control { margin-bottom: 8px; font-size: 9px; }
         .bubble-control label { display: flex; justify-content: space-between; margin-bottom: 4px; opacity: 0.85; }
         .bubble-control input { width: 100%; }
@@ -58,9 +52,37 @@
         #bubble-table { width: 100%; border-collapse: collapse; font-size: 9px; }
         #bubble-table th, #bubble-table td { border: 1px solid #273129; padding: 4px; text-align: left; }
         #bubble-table th { color: #9cf3cb; font-weight: 600; }
+        #bubble-body.bubble-hidden { display: none; }
+        .bubble-toggle-header { cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; }
+        .bubble-toggle-header:hover { opacity: 1; }
+        #bubble-toggle-icon { font-size: 10px; opacity: 0.5; }
+        #bubble-quick-summary { font-size: 9px; line-height: 1.4; margin-top: 6px; opacity: 0.8; }
+
+        /* ── TIMELINE (bottom center) ────────────────────────────────────────── */
+        #timeline-panel { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); width: 520px; background: rgba(8,8,8,0.95); border: 1px solid var(--border); padding: 12px 14px; z-index: 50; display: grid; grid-template-columns: 180px 1fr; grid-template-rows: auto; gap: 0 14px; }
+        #timeline-left { grid-column: 1; }
+        #timeline-right { grid-column: 2; }
+        #timeline-year { font-size: 28px; color: #9cf3cb; font-weight: 600; line-height: 1; margin: 2px 0 3px; }
+        #timeline-phase { font-size: 10px; opacity: 0.8; margin-bottom: 6px; }
+        #timeline-desc { font-size: 9px; line-height: 1.45; opacity: 0.75; margin-top: 6px; }
+        #timeline-slider { width: 100%; margin: 5px 0; }
+        #timeline-row { display: flex; gap: 5px; margin-top: 6px; }
+        #timeline-row button { flex: 1; padding: 6px 8px; font-size: 9px; }
+        #timeline-play-row { display: flex; gap: 5px; margin-top: 5px; }
+        #timeline-play-row button { flex: 1; padding: 6px 8px; font-size: 9px; }
+        #timeline-speed { flex: 1; background: #070707; color: #fff; border: 1px solid var(--border); padding: 5px; font: inherit; font-size: 9px; }
+        #timeline-chart { border: 1px solid #273129; padding: 6px; background: #050505; }
+        .timeline-legend { display: flex; gap: 8px; font-size: 8px; opacity: 0.75; margin-top: 4px; }
+        .timeline-legend span:nth-child(1)::before { content: '■ '; color: var(--chart-capex); }
+        .timeline-legend span:nth-child(2)::before { content: '■ '; color: var(--chart-debt); }
+        .timeline-legend span:nth-child(3)::before { content: '■ '; color: var(--chart-bubble); }
+        #timeline-deepdive { margin-top: 6px; border: 1px solid #273129; background: #070707; padding: 6px; font-size: 9px; line-height: 1.45; }
+        .deep-label { color: var(--deep-label-color); opacity: 0.9; }
+        .panel-title { font-size: 10px; letter-spacing: 0.08em; opacity: 0.7; margin-bottom: 8px; grid-column: 1 / -1; }
+
+        /* ── COMMON ──────────────────────────────────────────────────────────── */
         .stat { opacity: 0.9; }
         .stat b { color: #8cf7c7; font-weight: 600; }
-        .panel-title { font-size: 10px; letter-spacing: 0.08em; opacity: 0.7; margin-bottom: 8px; }
         #search-centers { width: 100%; box-sizing: border-box; background: #050505; color: #fff; border: 1px solid var(--border); padding: 8px; font: inherit; margin-bottom: 10px; }
         .center-row { border: 1px solid var(--border); padding: 8px; margin-bottom: 8px; cursor: pointer; background: #070707; }
         .center-row:hover { border-color: #7df0b5; background: #0e1a14; }
@@ -68,38 +90,21 @@
         .center-meta { font-size: 9px; opacity: 0.72; line-height: 1.4; }
         #info-panel a { color: #8fecc1; text-decoration: underline; }
         .chip { display: inline-block; padding: 2px 6px; border: 1px solid #2b5; margin: 0 4px 4px 0; font-size: 9px; }
-
-        #ctrl-btns { position: absolute; bottom: 24px; left: 24px; z-index: 50; display: flex; flex-direction: column; gap: 8px; }
-
         button { background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 12px 20px; cursor: pointer; font-family: inherit; font-size: 10px; transition: all 0.2s; text-align: left; }
         button:hover { border-color: #fff; background: #111; }
         button:disabled { opacity: 0.35; cursor: not-allowed; }
 
+        /* ── SPACE FRONTIER ──────────────────────────────────────────────────── */
         #frontier-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 35; text-align: center; opacity: 0; pointer-events: none; transition: opacity 0.45s ease; }
         #frontier-overlay.show { opacity: 1; }
         .frontier-kicker { font-size: 11px; letter-spacing: 0.18em; color: #9bc8ff; opacity: 0.8; }
         .frontier-title { font-size: 44px; letter-spacing: 0.1em; color: #f3fbff; margin: 4px 0; text-shadow: 0 0 20px rgba(167, 211, 255, 0.35); }
         .frontier-sub { font-size: 10px; letter-spacing: 0.08em; opacity: 0.9; }
 
-        #hint { position: absolute; bottom: 24px; right: 24px; font-size: 9px; opacity: 0.3; }
-        canvas { display: block; }
-
-        /* ── STORY MODE ─────────────────────────────────────────────────── */
-        #story-overlay {
-            position: fixed; inset: 0; z-index: 80;
-            background: rgba(0,0,0,0.86);
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.35s ease;
-        }
+        /* ── STORY MODE ──────────────────────────────────────────────────────── */
+        #story-overlay { position: fixed; inset: 0; z-index: 80; background: rgba(0,0,0,0.86); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.35s ease; }
         #story-overlay.show { opacity: 1; pointer-events: all; }
-        #story-card {
-            width: min(540px, 92vw);
-            background: #070f0a;
-            border: 1px solid #2a5a3a;
-            padding: 32px 36px;
-            position: relative;
-        }
+        #story-card { width: min(540px, 92vw); background: #070f0a; border: 1px solid #2a5a3a; padding: 32px 36px; position: relative; }
         #story-year { font-size: 52px; color: #9cf3cb; font-weight: 700; line-height: 1; margin-bottom: 4px; }
         #story-title { font-size: 11px; letter-spacing: 0.2em; color: #59c98a; margin-bottom: 14px; }
         #story-headline { font-size: 18px; font-weight: 600; color: #e8fff4; margin-bottom: 14px; line-height: 1.3; letter-spacing: 0.04em; }
@@ -114,33 +119,30 @@
         #story-exit:hover { opacity: 1; }
         #story-play { background: #0d2019; border-color: #2a5a3a; }
 
-        /* ── SIMPLIFIED VIEW ─────────────────────────────────────────────── */
+        /* ── SIMPLIFIED VIEW ─────────────────────────────────────────────────── */
         body.simplified #bubble-panel { display: none; }
         body.simplified #timeline-deepdive { display: none; }
         body.simplified #timeline-chart { display: none; }
         body.simplified .timeline-legend { display: none; }
         body.simplified #simplified-legend { display: block; }
-        body.simplified #hint { display: none; }
-        #simplified-legend {
-            display: none;
-            position: absolute; bottom: 24px; right: 24px;
-            background: rgba(8,8,8,0.95); border: 1px solid var(--border);
-            padding: 12px 16px; z-index: 50; font-size: 9px; line-height: 1.9;
-        }
+        #simplified-legend { display: none; position: absolute; bottom: 110px; right: 24px; background: rgba(8,8,8,0.95); border: 1px solid var(--border); padding: 12px 16px; z-index: 50; font-size: 9px; line-height: 1.9; }
         .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 
-        /* Scrollbar hide */
+        /* ── HINT ────────────────────────────────────────────────────────────── */
+        #hint { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); font-size: 9px; opacity: 0.25; white-space: nowrap; pointer-events: none; }
+        canvas { display: block; }
         ::-webkit-scrollbar { display: none; }
 
+        /* ── MOBILE ──────────────────────────────────────────────────────────── */
         @media (max-width: 900px) {
             #header { top: 14px; left: 14px; padding-left: 10px; }
-            #stats-panel { top: 72px; left: 14px; transform: none; right: 14px; width: auto; justify-content: space-between; }
+            #top-center { top: 72px; left: 14px; transform: none; right: 14px; align-items: flex-start; }
+            #stats-panel { width: 100%; justify-content: space-between; }
             #catalog-panel { display: none; }
-            #timeline-panel { top: 126px; left: 14px; right: 14px; width: auto; }
-            #bubble-panel { bottom: 14px; right: 14px; left: 14px; width: auto; max-height: 34vh; }
-            #info-panel { top: 286px; right: 14px; left: 14px; width: auto; padding: 12px; font-size: 10px; max-height: 24vh; }
-            #ctrl-btns { left: 14px; bottom: 14px; right: 14px; }
-            button { width: 100%; }
+            #timeline-panel { bottom: 14px; left: 14px; right: 14px; width: auto; transform: none; grid-template-columns: 1fr; }
+            #timeline-right { grid-column: 1; }
+            #bubble-panel { display: none; }
+            #info-panel { top: auto; bottom: 200px; right: 14px; left: 14px; width: auto; padding: 12px; font-size: 10px; max-height: 22vh; }
             #hint { display: none; }
             h1 { font-size: 14px; }
             #story-card { padding: 24px 20px; }
@@ -151,99 +153,115 @@
 </head>
 <body>
     <div id="header">
-        <h1>AI NEXUS // CONDUCTOR</h1>
+        <h1>AI NEXUS //</h1>
         <span class="version">TERMINAL VER. 8.0 // GLOBAL INFRA INTEL ACTIVE</span>
     </div>
 
-    <div id="stats-panel">
-        <div class="stat">SITES: <b id="stat-sites">0</b></div>
-        <div class="stat">EST. POWER: <b id="stat-power">0 MW</b></div>
-        <div class="stat">OPERATIONAL: <b id="stat-operational">0</b></div>
+    <!-- Stats + control buttons stacked at top-center -->
+    <div id="top-center">
+        <div id="stats-panel">
+            <div class="stat">SITES: <b id="stat-sites">0</b></div>
+            <div class="stat">EST. POWER: <b id="stat-power">0 MW</b></div>
+            <div class="stat">OPERATIONAL: <b id="stat-operational">0</b></div>
+        </div>
+        <div id="ctrl-btns">
+            <button id="btn-story-mode" onclick="toggleStoryMode()">STORY MODE</button>
+            <button id="btn-simplified" onclick="toggleSimplified()">SIMPLIFIED VIEW</button>
+            <button onclick="toggleLoop()">MONEY LOOP</button>
+            <button onclick="toggleChinaFlow()">CHINA FLOW</button>
+            <button onclick="window.location.reload()">REBOOT</button>
+        </div>
     </div>
 
+    <!-- Catalog: left side -->
     <div id="catalog-panel">
         <div class="panel-title">GLOBAL AI DATA CENTER INDEX</div>
         <input id="search-centers" placeholder="SEARCH REGION / OPERATOR / MODEL" />
         <div id="center-list"></div>
     </div>
 
-    <div id="timeline-panel">
-        <div class="panel-title" id="timeline-panel-label">TIMELINE // 2019-2030</div>
-        <div id="timeline-year">2019</div>
-        <div id="timeline-phase">BOOTSTRAP PHASE</div>
-        <input
-            id="timeline-slider"
-            type="range" min="2019" max="2030" step="1" value="2019"
-            aria-labelledby="timeline-panel-label timeline-year"
-        >
-        <div id="timeline-row">
-            <button id="timeline-prev">PREV YEAR</button>
-            <button id="timeline-next">NEXT YEAR</button>
-        </div>
-        <div id="timeline-play-row">
-            <button id="timeline-play">PLAY</button>
-            <select id="timeline-speed">
-                <option value="1300">SPEED 1X</option>
-                <option value="800">SPEED 1.6X</option>
-                <option value="500">SPEED 2.6X</option>
-            </select>
-        </div>
-        <div id="timeline-chart"></div>
-        <div class="timeline-legend">
-            <span>CAPEX</span>
-            <span>DEBT</span>
-            <span>BUBBLE</span>
-        </div>
-        <div id="timeline-deepdive">
-            <div><span class="deep-label">DRIVER:</span> GPU SUPPLY CONSTRAINTS.</div>
-            <div><span class="deep-label">DEBT SIGNAL:</span> LOW REFINANCE PRESSURE.</div>
-            <div><span class="deep-label">TRIGGER:</span> UTILIZATION DROP BELOW 70%.</div>
-            <div><span class="deep-label">RESPONSE:</span> MODERATE CAPEX, PROVE ROI.</div>
-        </div>
-        <div id="timeline-desc">EARLY GPU SCARCITY, MODEST DEBT LOADS, EXPERIMENTAL MODEL ECONOMICS.</div>
-    </div>
-
+    <!-- Info panel: top-right -->
     <div id="info-panel">
         [SYSTEM ONLINE]<br>SELECT A SITE FOR FULL IMPACT + MODEL BREAKDOWN.
     </div>
 
+    <!-- Bubble panel: right, below info, collapsible -->
     <div id="bubble-panel">
-        <div class="panel-title">AI BUBBLE / DEBT STRESS LAB</div>
-        <div style="font-size:9px;opacity:0.75;line-height:1.45;">
-            MODELS THE DEBT-CYCLE THESIS FROM MARKET COMMENTARY.
-            <a href="https://www.youtube.com/watch?v=C6eXTvqdaro" target="_blank" rel="noopener noreferrer">REFERENCE VIDEO</a>
+        <div class="bubble-toggle-header" onclick="toggleBubbleLab()">
+            <span class="panel-title" style="margin-bottom:0">AI BUBBLE / DEBT STRESS LAB</span>
+            <span id="bubble-toggle-icon">▶</span>
         </div>
-        <div class="bubble-control">
-            <label>INTEREST RATE SHOCK <span id="rate-shock-val">0.0%</span></label>
-            <input id="rate-shock" type="range" min="0" max="5" step="0.1" value="0">
+        <div id="bubble-quick-summary"></div>
+        <div id="bubble-body" class="bubble-hidden">
+            <div style="font-size:9px;opacity:0.75;line-height:1.45;margin-top:8px;">
+                MODELS THE DEBT-CYCLE THESIS FROM MARKET COMMENTARY.
+                <a href="https://www.youtube.com/watch?v=C6eXTvqdaro" target="_blank" rel="noopener noreferrer">REFERENCE VIDEO</a>
+            </div>
+            <div class="bubble-control">
+                <label>INTEREST RATE SHOCK <span id="rate-shock-val">0.0%</span></label>
+                <input id="rate-shock" type="range" min="0" max="5" step="0.1" value="0">
+            </div>
+            <div class="bubble-control">
+                <label>GPU UTILIZATION <span id="utilization-val">78%</span></label>
+                <input id="utilization" type="range" min="45" max="100" step="1" value="78">
+            </div>
+            <div class="bubble-control">
+                <label>POWER COST INFLATION <span id="power-inflation-val">0%</span></label>
+                <input id="power-inflation" type="range" min="0" max="60" step="1" value="0">
+            </div>
+            <div class="bubble-control">
+                <label>AI REVENUE GROWTH <span id="revenue-growth-val">12%</span></label>
+                <input id="revenue-growth" type="range" min="-20" max="45" step="1" value="12">
+            </div>
+            <div class="bubble-btns">
+                <button id="bubble-base">BASELINE</button>
+                <button id="bubble-stress">TILBURY STRESS</button>
+                <button id="bubble-reset">RESET</button>
+            </div>
+            <div id="bubble-summary">CALCULATING STRESS...</div>
+            <div id="bubble-grid"></div>
         </div>
-        <div class="bubble-control">
-            <label>GPU UTILIZATION <span id="utilization-val">78%</span></label>
-            <input id="utilization" type="range" min="45" max="100" step="1" value="78">
-        </div>
-        <div class="bubble-control">
-            <label>POWER COST INFLATION <span id="power-inflation-val">0%</span></label>
-            <input id="power-inflation" type="range" min="0" max="60" step="1" value="0">
-        </div>
-        <div class="bubble-control">
-            <label>AI REVENUE GROWTH <span id="revenue-growth-val">12%</span></label>
-            <input id="revenue-growth" type="range" min="-20" max="45" step="1" value="12">
-        </div>
-        <div class="bubble-btns">
-            <button id="bubble-base">BASELINE</button>
-            <button id="bubble-stress">TILBURY STRESS</button>
-            <button id="bubble-reset">RESET</button>
-        </div>
-        <div id="bubble-summary">CALCULATING STRESS...</div>
-        <div id="bubble-grid"></div>
     </div>
 
-    <div id="ctrl-btns">
-        <button id="btn-story-mode" onclick="toggleStoryMode()">[STORY] STORY MODE</button>
-        <button id="btn-simplified" onclick="toggleSimplified()">[VIEW] SIMPLIFIED VIEW</button>
-        <button onclick="toggleLoop()">[MODE] TOGGLE MONEY LOOP (ANIMATED)</button>
-        <button onclick="toggleChinaFlow()">[MODE] TOGGLE CHINA FLOW LAYER</button>
-        <button onclick="window.location.reload()">[CMD] REBOOT TERMINAL</button>
+    <!-- Timeline: bottom center, two-column grid -->
+    <div id="timeline-panel">
+        <div class="panel-title" id="timeline-panel-label">TIMELINE // 2019-2030</div>
+        <div id="timeline-left">
+            <div id="timeline-year">2019</div>
+            <div id="timeline-phase">PRE-BOOM</div>
+            <input
+                id="timeline-slider"
+                type="range" min="2019" max="2030" step="1" value="2019"
+                aria-labelledby="timeline-panel-label timeline-year"
+            >
+            <div id="timeline-row">
+                <button id="timeline-prev">◀ PREV</button>
+                <button id="timeline-next">NEXT ▶</button>
+            </div>
+            <div id="timeline-play-row">
+                <button id="timeline-play">PLAY</button>
+                <select id="timeline-speed">
+                    <option value="1300">1X</option>
+                    <option value="800">1.6X</option>
+                    <option value="500">2.6X</option>
+                </select>
+            </div>
+            <div id="timeline-desc" style="margin-top:6px;"></div>
+        </div>
+        <div id="timeline-right">
+            <div id="timeline-chart"></div>
+            <div class="timeline-legend">
+                <span>CAPEX</span>
+                <span>DEBT</span>
+                <span>BUBBLE</span>
+            </div>
+            <div id="timeline-deepdive">
+                <div><span class="deep-label">DRIVER:</span> —</div>
+                <div><span class="deep-label">DEBT SIGNAL:</span> —</div>
+                <div><span class="deep-label">TRIGGER:</span> —</div>
+                <div><span class="deep-label">RESPONSE:</span> —</div>
+            </div>
+        </div>
     </div>
 
     <!-- Story Mode Overlay -->
@@ -264,14 +282,13 @@
         </div>
     </div>
 
-    <!-- Simplified Legend (shown in simplified mode) -->
+    <!-- Simplified Legend -->
     <div id="simplified-legend">
         <div class="panel-title">MAP LEGEND</div>
-        <div><span class="legend-dot" style="background:#fff"></span> Online data center</div>
-        <div><span class="legend-dot" style="background:#62ffd2"></span> Expanding data center</div>
-        <div><span class="legend-dot" style="background:#ffcf70"></span> Planned / announced</div>
-        <div><span class="legend-dot" style="background:#94ffd9"></span> Currently selected</div>
-        <div style="margin-top:8px;opacity:0.6;">Green arcs = capital flows between sites and HQ</div>
+        <div><span class="legend-dot" style="background:#fff"></span> Online</div>
+        <div><span class="legend-dot" style="background:#62ffd2"></span> Expanding</div>
+        <div><span class="legend-dot" style="background:#ffcf70"></span> Planned</div>
+        <div><span class="legend-dot" style="background:#94ffd9"></span> Selected</div>
     </div>
 
     <div id="frontier-overlay">
@@ -280,7 +297,7 @@
         <div class="frontier-sub">COOLED BY THE VOID, POWERED BY THE SUN.</div>
     </div>
 
-    <div id="hint">MOUSE_LEFT: ROTATE // SCROLL: ZOOM (PULL FAR OUT FOR SPACE VIEW) // CLICK: SELECT_NODE (LARGE HIT AREA)</div>
+    <div id="hint">ROTATE: DRAG // ZOOM: SCROLL // SELECT: CLICK NODE</div>
     <script type="module" src="./main.js"></script>
 </body>
 </html>

@@ -438,6 +438,7 @@ let timelineTimer = null;
 let spaceTransition = 0;
 let simplifiedMode = false;
 let storyModeActive = false;
+let bubbleLabExpanded = false;
 
 const SPACE_ZOOM_START = 14;
 const SPACE_ZOOM_FULL = 36;
@@ -563,6 +564,11 @@ function updateBubbleLab() {
     (results.find((row) => row.operator === 'CHINA')?.score ?? 0) -
     (results.find((row) => row.operator === 'AWS')?.score ?? 0);
   const globalRisk = riskBand(marketBubble);
+
+  const quickSummaryEl = document.getElementById('bubble-quick-summary');
+  if (quickSummaryEl) {
+    quickSummaryEl.innerHTML = `BUBBLE INDEX: <span class="${globalRisk.className}">${marketBubble.toFixed(1)} / 100 (${globalRisk.label})</span> — ${atRisk}/${results.length} HIGH RISK`;
+  }
 
   bubbleSummary.innerHTML = [
     `GLOBAL BUBBLE INDEX: <span class="${globalRisk.className}">${marketBubble.toFixed(1)} / 100 (${globalRisk.label})</span><br>`,
@@ -992,11 +998,21 @@ function renderSimplifiedInfoHtml(center) {
 window.toggleSimplified = function() {
   simplifiedMode = !simplifiedMode;
   document.body.classList.toggle('simplified', simplifiedMode);
-  if (simplifiedBtnEl) simplifiedBtnEl.innerText = simplifiedMode ? '[VIEW] EXPERT MODE' : '[VIEW] SIMPLIFIED VIEW';
+  if (simplifiedBtnEl) simplifiedBtnEl.innerText = simplifiedMode ? 'EXPERT MODE' : 'SIMPLIFIED VIEW';
   const activeCenter = DATA_CENTERS.find((c) => c.id === activeCenterId);
   if (activeCenter) {
     infoPanel.innerHTML = simplifiedMode ? renderSimplifiedInfoHtml(activeCenter) : centerDetailsHtml(activeCenter);
   }
+};
+
+// ─── BUBBLE LAB COLLAPSE ────────────────────────────────────────────────────
+
+window.toggleBubbleLab = function() {
+  bubbleLabExpanded = !bubbleLabExpanded;
+  const body = document.getElementById('bubble-body');
+  const icon = document.getElementById('bubble-toggle-icon');
+  if (body) body.classList.toggle('bubble-hidden', !bubbleLabExpanded);
+  if (icon) icon.innerText = bubbleLabExpanded ? '▼' : '▶';
 };
 
 function animate() {
