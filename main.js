@@ -133,6 +133,10 @@ const OPERATOR_LINKS = {
     { label: 'xAI (Company)', url: 'https://x.ai/' },
     { label: 'Memphis Utility Context', url: 'https://www.mlgw.com/' }
   ],
+  CHINA: [
+    { label: 'Alibaba Cloud Global Infrastructure', url: 'https://www.alibabacloud.com/global-locations' },
+    { label: 'Tencent Cloud Regions', url: 'https://www.tencentcloud.com/products/regions' }
+  ],
   NVIDIA: [
     { label: 'NVIDIA Data Center', url: 'https://www.nvidia.com/en-us/data-center/' },
     { label: 'NVIDIA Sustainability', url: 'https://www.nvidia.com/en-us/about-nvidia/corporate-responsibility/' }
@@ -182,7 +186,13 @@ const DATA_CENTERS = [
   { id: 'colo-4', name: 'QTS Atlanta Metro', operator: 'COLOCATION', lat: 33.75, lon: -84.39, status: 'Operational', powerMW: 220, models: ['Hybrid cloud model hosting'], cooling: 'Air-side + adiabatic', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '360 / 1020', role: 'Southeast enterprise and media AI serving.' },
 
   { id: 'nv-1', name: 'NVIDIA DGX Cloud Hub (Santa Clara)', operator: 'NVIDIA', lat: 37.35, lon: -121.95, status: 'Operational', powerMW: 120, models: ['NIM services', 'Llama', 'Nemotron'], cooling: 'Advanced liquid racks', waterRisk: 'Low', gridRisk: 'Medium', jobs: '210 / 560', role: 'Reference AI platform and partner enablement.' },
-  { id: 'xai-1', name: 'xAI Colossus (Memphis)', operator: 'XAI', lat: 35.15, lon: -90.05, status: 'Operational', powerMW: 260, models: ['Grok family'], cooling: 'Containerized liquid + air hybrid', waterRisk: 'Medium', gridRisk: 'High', jobs: '340 / 1000', role: 'Fast-iteration frontier model training site.' }
+  { id: 'xai-1', name: 'xAI Colossus (Memphis)', operator: 'XAI', lat: 35.15, lon: -90.05, status: 'Operational', powerMW: 260, models: ['Grok family'], cooling: 'Containerized liquid + air hybrid', waterRisk: 'Medium', gridRisk: 'High', jobs: '340 / 1000', role: 'Fast-iteration frontier model training site.' },
+
+  { id: 'cn-1', name: 'Alibaba Zhangbei Cluster', operator: 'CHINA', lat: 41.15, lon: 114.7, status: 'Operational', powerMW: 390, models: ['Qwen family', 'Industry LLMs'], cooling: 'Air + direct liquid pilots', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '620 / 1800', role: 'Large-scale domestic foundation model hosting.' },
+  { id: 'cn-2', name: 'Tencent Qingyuan Cluster', operator: 'CHINA', lat: 23.68, lon: 113.06, status: 'Operational', powerMW: 320, models: ['Hunyuan family', 'Multimodal assistants'], cooling: 'Hybrid chilled water', waterRisk: 'High', gridRisk: 'Medium', jobs: '520 / 1500', role: 'South China inference and AI cloud serving.' },
+  { id: 'cn-3', name: 'Baidu Yangquan AI DC', operator: 'CHINA', lat: 37.86, lon: 113.58, status: 'Expansion', powerMW: 280, models: ['ERNIE family', 'Autonomous driving models'], cooling: 'Free-air + liquid assist', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '430 / 1300', role: 'Search + autonomous AI workloads.' },
+  { id: 'cn-4', name: 'Huawei Guizhou Region', operator: 'CHINA', lat: 26.65, lon: 106.63, status: 'Operational', powerMW: 340, models: ['Pangu family', 'Enterprise copilot models'], cooling: 'Low-ambient optimized', waterRisk: 'Medium', gridRisk: 'Low', jobs: '570 / 1700', role: 'Domestic enterprise model platform backend.' },
+  { id: 'cn-5', name: 'ByteDance Ulanqab Hub', operator: 'CHINA', lat: 41.03, lon: 113.12, status: 'Expansion', powerMW: 300, models: ['Recommendation + video generation models'], cooling: 'Air + liquid retrofit', waterRisk: 'Low', gridRisk: 'Medium', jobs: '480 / 1400', role: 'Massive recommender and media model infrastructure.' }
 ];
 
 const HQS = {
@@ -195,13 +205,16 @@ const HQS = {
   COREWEAVE: { lat: 40.73, lon: -74.0 },
   COLOCATION: { lat: 39.04, lon: -77.49 },
   NVIDIA: { lat: 37.39, lon: -121.96 },
-  XAI: { lat: 35.15, lon: -90.05 }
+  XAI: { lat: 35.15, lon: -90.05 },
+  CHINA: { lat: 31.23, lon: 121.47 }
 };
 
 const markers = new THREE.Group();
+const markerHitTargets = new THREE.Group();
 const arcs = new THREE.Group();
 const loopGroup = new THREE.Group();
-globeGroup.add(markers, arcs, loopGroup);
+const chinaFlowGroup = new THREE.Group();
+globeGroup.add(markers, markerHitTargets, arcs, loopGroup, chinaFlowGroup);
 
 function createArc(start, end, color = 0x79ffd0, opacity = 0.18, height = 2.8) {
   const startVec = latLonToVector3(start.lat, start.lon, globeRadius + 0.03);
@@ -232,6 +245,19 @@ DATA_CENTERS.forEach((center) => {
   markers.add(marker);
   markerById.set(center.id, marker);
 
+  const hitTarget = new THREE.Mesh(
+    new THREE.SphereGeometry(0.1, 12, 12),
+    new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.0,
+      depthWrite: false
+    })
+  );
+  hitTarget.userData = center;
+  hitTarget.position.copy(position);
+  markerHitTargets.add(hitTarget);
+
   const hq = HQS[center.operator];
   if (hq && !(hq.lat === center.lat && hq.lon === center.lon)) {
     arcs.add(createArc(center, hq, 0x70f8c6, 0.12, 2.7));
@@ -253,18 +279,36 @@ window.toggleLoop = () => {
   loopGroup.visible = !loopGroup.visible;
 };
 
+const chinaFlows = [
+  createArc(HQS.NVIDIA, HQS.CHINA, 0xffb55e, 0.45, 2.55),
+  createArc(HQS.GOOGLE, HQS.CHINA, 0xffb55e, 0.28, 2.5),
+  createArc(HQS.AWS, HQS.CHINA, 0xffb55e, 0.28, 2.5),
+  createArc(HQS.CHINA, HQS.NVIDIA, 0xffd18a, 0.4, 2.6),
+  createArc(HQS.CHINA, HQS.COREWEAVE, 0xffb55e, 0.2, 2.45)
+];
+chinaFlows.forEach((line) => chinaFlowGroup.add(line));
+chinaFlowGroup.visible = false;
+
+window.toggleChinaFlow = () => {
+  chinaFlowGroup.visible = !chinaFlowGroup.visible;
+};
+
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 let suppressClickUntil = 0;
 let activeCenterId = null;
 let focusPoint = null;
+let pointerDownPos = null;
+let draggedSincePointerDown = false;
 
 controls.addEventListener('start', () => {
+  draggedSincePointerDown = true;
   suppressClickUntil = performance.now() + 120;
 });
 
-window.addEventListener('pointerdown', () => {
-  suppressClickUntil = performance.now() + 120;
+window.addEventListener('pointerdown', (event) => {
+  pointerDownPos = { x: event.clientX, y: event.clientY };
+  draggedSincePointerDown = false;
 });
 
 function centerLinks(center) {
@@ -356,12 +400,18 @@ searchInput.addEventListener('input', () => {
 
 window.addEventListener('click', (event) => {
   if (performance.now() < suppressClickUntil) return;
+  if (draggedSincePointerDown) return;
+  if (pointerDownPos) {
+    const dx = event.clientX - pointerDownPos.x;
+    const dy = event.clientY - pointerDownPos.y;
+    if (Math.hypot(dx, dy) > 8) return;
+  }
 
   pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
   pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
 
-  const hits = raycaster.intersectObjects(markers.children);
+  const hits = raycaster.intersectObjects(markerHitTargets.children);
   if (hits.length === 0) return;
   const center = hits[0].object.userData;
   selectCenter(center, true);
