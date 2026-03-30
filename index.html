@@ -10,6 +10,8 @@
         .stat-item { text-align: center; }
         .stat-val { font-size: 20px; font-weight: bold; }
         .stat-label { font-size: 9px; margin-top: 5px; opacity: 0.6; }
+        #search-bar { position: absolute; top: 100px; left: 20px; }
+        #search-bar input { background: #000; border: 1px solid #fff; color: #fff; padding: 10px; font-family: inherit; width: 200px; }
         #space-alert { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; opacity: 0; transition: opacity 1s; pointer-events: none; border: 1px solid #fff; padding: 40px; background: #000; }
         #space-alert h1 { font-size: 40px; margin: 0; }
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
@@ -27,10 +29,18 @@
         <p>INFRASTRUCTURE TRACKER VER. 2.0</p>
     </div>
 
+    <div id="search-bar">
+        <input type="text" placeholder="FILTER BY COMPANY/HW" oninput="handleSearch(this.value)">
+    </div>
+
     <div id="stats-bar">
         <div class="stat-item">
             <div id="total-power" class="stat-val">0 MW</div>
             <div class="stat-label">GRID LOAD</div>
+        </div>
+        <div class="stat-item">
+            <div id="gpu-count" class="stat-val">0</div>
+            <div class="stat-label">EST. GPU UNITS</div>
         </div>
     </div>
 
