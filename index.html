@@ -36,6 +36,8 @@
         #timeline-speed { flex: 1; background: #070707; color: #fff; border: 1px solid var(--border); padding: 7px; font: inherit; font-size: 9px; }
         #timeline-chart { margin-top: 8px; border: 1px solid #273129; padding: 6px; background: #050505; }
         .timeline-legend { display: flex; gap: 8px; font-size: 8px; opacity: 0.75; margin-top: 4px; }
+        #timeline-deepdive { margin-top: 8px; border: 1px solid #273129; background: #070707; padding: 8px; font-size: 9px; line-height: 1.45; }
+        .deep-label { color: #97f5ca; opacity: 0.9; }
         #bubble-panel { position: absolute; bottom: 24px; right: 24px; width: 360px; max-height: 44vh; overflow: auto; background: rgba(8,8,8,0.95); border: 1px solid var(--border); padding: 12px; z-index: 50; }
         .bubble-control { margin-bottom: 8px; font-size: 9px; }
         .bubble-control label { display: flex; justify-content: space-between; margin-bottom: 4px; opacity: 0.85; }
@@ -125,6 +127,12 @@
             <span>CAPEX INDEX</span>
             <span>DEBT INDEX</span>
             <span>BUBBLE INDEX</span>
+        </div>
+        <div id="timeline-deepdive">
+            <div><span class="deep-label">DRIVER:</span> GPU SUPPLY CONSTRAINTS.</div>
+            <div><span class="deep-label">DEBT SIGNAL:</span> LOW REFINANCE PRESSURE.</div>
+            <div><span class="deep-label">TRIGGER:</span> UTILIZATION DROP BELOW 70%.</div>
+            <div><span class="deep-label">RESPONSE:</span> MODERATE CAPEX, PROVE ROI.</div>
         </div>
         <div id="timeline-desc">EARLY GPU SCARCITY, MODEST DEBT LOADS, EXPERIMENTAL MODEL ECONOMICS.</div>
     </div>

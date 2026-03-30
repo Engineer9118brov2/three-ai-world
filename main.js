@@ -30,6 +30,7 @@ const timelineNextBtn = document.getElementById('timeline-next');
 const timelinePlayBtn = document.getElementById('timeline-play');
 const timelineSpeedSelect = document.getElementById('timeline-speed');
 const timelineChartEl = document.getElementById('timeline-chart');
+const timelineDeepDiveEl = document.getElementById('timeline-deepdive');
 
 let renderer;
 try {
@@ -208,6 +209,21 @@ const TIMELINE_METRICS = [
   { year: 2029, capex: 69, debt: 104, bubble: 64, util: 75, powerInflation: 19, growth: 12, rateShock: 1.8 },
   { year: 2030, capex: 66, debt: 98, bubble: 58, util: 78, powerInflation: 14, growth: 14, rateShock: 1.2 }
 ];
+
+const TIMELINE_DEEP_DIVE = {
+  2019: { driver: 'EARLY FOUNDATION MODEL EXPERIMENTS', debt: 'BALANCE SHEETS STILL FLEXIBLE', trigger: 'GPU PRICES OUTPACE CUSTOMER VALUE', response: 'KEEP SPEND DISCIPLINED' },
+  2020: { driver: 'PANDEMIC DIGITAL DEMAND SHOCK', debt: 'CHEAP CREDIT SUPPORTS CAPEX', trigger: 'DEMAND NORMALIZATION', response: 'LOCK LONG-TERM CONTRACTS CAUTIOUSLY' },
+  2021: { driver: 'MULTI-CLOUD ENTERPRISE UPTAKE', debt: 'DEBT BUILDING BUT COVERED', trigger: 'CLOUD PRICE COMPRESSION', response: 'PRIORITIZE HIGH-MARGIN USE CASES' },
+  2022: { driver: 'GEN-AI PRODUCT BREAKOUT', debt: 'CAPEX COMMITMENTS ACCELERATE', trigger: "USAGE DOESN'T CONVERT TO REVENUE", response: 'TIGHTEN UNIT ECONOMICS' },
+  2023: { driver: 'GPU SUPPLY SCRAMBLE', debt: 'LEASE + FINANCING STACK EXPANDS', trigger: 'IDLE CAPACITY POST-BUYING WAVE', response: 'SHIFT TO FLEXIBLE CAPACITY' },
+  2024: { driver: 'HYPERSCALE ARMS RACE', debt: 'LARGE MATURITY WALL FORMING', trigger: 'RATE STAYS HIGHER FOR LONGER', response: 'DE-LAYER CAPEX PRIORITIES' },
+  2025: { driver: 'ROI PRESSURE FROM INVESTORS', debt: 'INTEREST COVERAGE STARTS FRAGILE FOR SOME', trigger: 'TOKEN PRICING DETERIORATION', response: 'FOCUS ON PROFITABLE VERTICALS' },
+  2026: { driver: 'REFINANCING WINDOW OPENS', debt: 'ROLLING DEBT COSTS STEP UP', trigger: 'UTILIZATION < 70%', response: 'CAPEX CUTS + CONSOLIDATION' },
+  2027: { driver: 'EFFICIENCY MODELS REDUCE DEMAND PER TOKEN', debt: 'LEGACY ASSETS RISK STRANDING', trigger: 'WRITE-DOWNS ON OLD CLUSTERS', response: 'RETIRE LOW-EFFICIENCY FLEETS' },
+  2028: { driver: 'PLATFORM CONSOLIDATION', debt: 'SURVIVORS IMPROVE COVERAGE', trigger: 'POWER SUPPLY SHOCK', response: 'GEOGRAPHIC LOAD BALANCING' },
+  2029: { driver: 'MARKET REPRICING', debt: 'DEBT METRICS STABILIZE FOR WINNERS', trigger: 'SECOND DEMAND SLOWDOWN', response: 'ASSET-LIGHT EXPANSION' },
+  2030: { driver: 'UTILITY-LIKE AI INFRA MODEL', debt: 'DISCIPLINED CAPITAL RETURNS', trigger: 'POLICY/GRID CONSTRAINTS', response: 'LONG-HORIZON CAPACITY PLANNING' }
+};
 
 const DATA_CENTERS = [
   { id: 'aws-1', name: 'AWS US-East (N. Virginia)', operator: 'AWS', lat: 38.95, lon: -77.45, status: 'Operational', powerMW: 620, models: ['Claude', 'Llama', 'Mistral', 'Titan'], cooling: 'Air + liquid retrofit', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '1100 direct / 3600 indirect', role: 'Primary east-coast AI inference + training region.' },
@@ -586,6 +602,22 @@ function renderTimelineChart() {
   `;
 }
 
+function renderTimelineDeepDive(year) {
+  const deep = TIMELINE_DEEP_DIVE[year] ?? TIMELINE_DEEP_DIVE[2019];
+  const m = timelineMetrics(year);
+  const maturityPressure =
+    year <= 2022 ? 'LOW' : year <= 2025 ? 'MEDIUM' : year <= 2027 ? 'HIGH' : 'MEDIUM';
+
+  timelineDeepDiveEl.innerHTML = [
+    `<div><span class="deep-label">DRIVER:</span> ${deep.driver}</div>`,
+    `<div><span class="deep-label">DEBT SIGNAL:</span> ${deep.debt}</div>`,
+    `<div><span class="deep-label">TRIGGER:</span> ${deep.trigger}</div>`,
+    `<div><span class="deep-label">RESPONSE:</span> ${deep.response}</div>`,
+    `<div style="margin-top:6px;"><span class="deep-label">MATURITY PRESSURE:</span> ${maturityPressure}</div>`,
+    `<div><span class="deep-label">UTILIZATION BASELINE:</span> ${m.util}%</div>`
+  ].join('');
+}
+
 function timelineEntry(year) {
   return TIMELINE.find((item) => item.year === year) ?? TIMELINE[0];
 }
@@ -623,6 +655,7 @@ function setTimelineYear(year) {
   syncBubbleToTimeline(clamped);
   updateBubbleLab();
   renderTimelineChart();
+  renderTimelineDeepDive(clamped);
   applyTimelineVisibility();
 }
 
