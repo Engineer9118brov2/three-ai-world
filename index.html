@@ -1,44 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Global Impact Dashboard</title>
+    <title>AI Infrastructure Hub</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #020205; color: white; font-family: sans-serif; }
+        body { margin: 0; overflow: hidden; background: #010103; color: white; font-family: sans-serif; }
         #ui { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); text-align: center; width: 80%; }
-        #info-panel { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.85); padding: 20px; border-radius: 12px; border: 1px solid #444; width: 280px; }
-        #stats-bar { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 40px; background: rgba(0,0,0,0.6); padding: 15px 30px; border-radius: 30px; border: 1px solid #333; }
+        #info-panel { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.85); padding: 20px; border-radius: 12px; border: 1px solid #444; width: 300px; line-height: 1.6; }
+        #stats-bar { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 40px; background: rgba(0,0,0,0.6); padding: 15px 30px; border-radius: 30px; border: 1px solid #333; backdrop-filter: blur(10px); }
         .stat-item { text-align: center; }
         .stat-val { font-size: 24px; font-weight: bold; color: #ff3300; }
         .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; }
+        #space-alert { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; opacity: 0; transition: opacity 1s; pointer-events: none; }
+        #space-alert h1 { font-size: 60px; margin: 0; background: linear-gradient(to bottom, #fff, #444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         input { width: 100%; cursor: pointer; accent-color: #ff3300; }
         #header { position: absolute; top: 20px; left: 20px; }
-        .impact-red { color: #ff3300; font-weight: bold; }
+        .highlight { color: #ff3300; font-weight: bold; }
     </style>
 </head>
 <body>
     <div id="header">
-        <h1>Global AI Impact</h1>
-        <p>The <span class="impact-red">Physical Footprint</span> of Intelligence.</p>
+        <h1>Global AI Nexus</h1>
+        <p>Tracking the <span class="highlight">Hardware of Intelligence</span>.</p>
     </div>
 
     <div id="stats-bar">
         <div class="stat-item">
             <div id="total-power" class="stat-val">0 MW</div>
-            <div class="stat-label">Total Power Demand</div>
-        </div>
-        <div class="stat-item">
-            <div id="total-water" class="stat-val">0 M Gal</div>
-            <div class="stat-label">Total Water Usage</div>
+            <div class="stat-label">Terrestrial Demand</div>
         </div>
     </div>
 
     <div id="info-panel">
-        <p>Select a date to track the expansion.</p>
+        <p>Scrub the timeline to track the physical footprint of AI development.</p>
+    </div>
+
+    <div id="space-alert">
+        <h1>THE NEXT FRONTIER: SPACE</h1>
+        <p>Cooled by the void. Powered by the sun.</p>
     </div>
 
     <div id="ui">
         <h2 id="date-label">2024-01</h2>
         <input type="range" min="0" max="14" value="0" oninput="updateTimeline(this.value)">
+        <p style="font-size: 10px; color: #666;">SCROLL TO ZOOM OUT TO SPACE</p>
     </div>
     <script type="module" src="/main.js"></script>
 </body>
