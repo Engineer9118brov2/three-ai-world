@@ -21,6 +21,12 @@ const revenueGrowthVal = document.getElementById('revenue-growth-val');
 const bubbleBaseBtn = document.getElementById('bubble-base');
 const bubbleStressBtn = document.getElementById('bubble-stress');
 const bubbleResetBtn = document.getElementById('bubble-reset');
+const timelineYearEl = document.getElementById('timeline-year');
+const timelinePhaseEl = document.getElementById('timeline-phase');
+const timelineDescEl = document.getElementById('timeline-desc');
+const timelineSlider = document.getElementById('timeline-slider');
+const timelinePrevBtn = document.getElementById('timeline-prev');
+const timelineNextBtn = document.getElementById('timeline-next');
 
 let renderer;
 try {
@@ -170,6 +176,21 @@ const BUBBLE_OPERATORS = {
   CHINA: { debtB: 210, capexB: 78, revenueB: 95, ebitdaMargin: 0.2, baseRate: 5.0, aiShare: 0.34 }
 };
 
+const TIMELINE = [
+  { year: 2019, phase: 'PRE-BOOM', desc: 'AI spend is meaningful but still niche. Capex and debt loads are manageable; utilization is variable.' },
+  { year: 2020, phase: 'DIGITAL ACCELERATION', desc: 'Pandemic demand accelerates cloud migration. GPU demand starts outpacing supply in key regions.' },
+  { year: 2021, phase: 'SCALE-UP', desc: 'Large model training budgets rise sharply; infrastructure commitments lock in multiyear power contracts.' },
+  { year: 2022, phase: 'GEN-AI INFLECTION', desc: 'Public launch moment. Capital markets reward growth; debt-backed expansion becomes easier to justify.' },
+  { year: 2023, phase: 'GPU SCRAMBLE', desc: 'Datacenter retrofits, colocation GPU deals, and leasing premiums spike. Execution risk rises.' },
+  { year: 2024, phase: 'HYPERSCALE CAPEX CYCLE', desc: 'Massive AI capex wave. Narrative shifts from capability race to monetization pressure.' },
+  { year: 2025, phase: 'MONETIZATION TEST', desc: 'Revenue per token and enterprise conversion rates become key. Weak utilization starts hurting margins.' },
+  { year: 2026, phase: 'DEBT REPRICING WINDOW', desc: 'Refinancing and power-cost sensitivity matter more. Operators with low coverage ratios face stress.' },
+  { year: 2027, phase: 'CONSOLIDATION RISK', desc: 'If demand growth slows, overbuilt clusters and idle accelerators can force write-downs.' },
+  { year: 2028, phase: 'EFFICIENCY WARS', desc: 'Model compression and inference efficiency reduce spend per output; weaker facilities struggle to stay full.' },
+  { year: 2029, phase: 'RESET OR RE-ACCELERATION', desc: 'Market bifurcates: high-utilization operators compound, over-levered players cut capex aggressively.' },
+  { year: 2030, phase: 'NEW BASELINE', desc: 'AI infrastructure matures into utility-like economics for winners; debt discipline decides survivorship.' }
+];
+
 const DATA_CENTERS = [
   { id: 'aws-1', name: 'AWS US-East (N. Virginia)', operator: 'AWS', lat: 38.95, lon: -77.45, status: 'Operational', powerMW: 620, models: ['Claude', 'Llama', 'Mistral', 'Titan'], cooling: 'Air + liquid retrofit', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '1100 direct / 3600 indirect', role: 'Primary east-coast AI inference + training region.' },
   { id: 'aws-2', name: 'AWS US-West (Oregon)', operator: 'AWS', lat: 45.6, lon: -121.18, status: 'Operational', powerMW: 480, models: ['Claude', 'Llama', 'Titan', 'Stable Diffusion'], cooling: 'Evaporative + liquid loops', waterRisk: 'Medium', gridRisk: 'Low', jobs: '850 / 2500', role: 'West-coast low-latency model serving and batch training.' },
@@ -222,6 +243,23 @@ const DATA_CENTERS = [
   { id: 'cn-5', name: 'ByteDance Ulanqab Hub', operator: 'CHINA', lat: 41.03, lon: 113.12, status: 'Expansion', powerMW: 300, models: ['Recommendation + video generation models'], cooling: 'Air + liquid retrofit', waterRisk: 'Low', gridRisk: 'Medium', jobs: '480 / 1400', role: 'Massive recommender and media model infrastructure.' }
 ];
 
+const CENTER_ONLINE_YEAR = {
+  'aws-1': 2019, 'aws-2': 2019, 'aws-3': 2020, 'aws-4': 2021, 'aws-5': 2021, 'aws-6': 2025,
+  'az-1': 2019, 'az-2': 2020, 'az-3': 2021, 'az-4': 2020, 'az-5': 2025, 'az-6': 2028,
+  'gcp-1': 2019, 'gcp-2': 2019, 'gcp-3': 2020, 'gcp-4': 2020, 'gcp-5': 2021, 'gcp-6': 2027,
+  'meta-1': 2020, 'meta-2': 2021, 'meta-3': 2020, 'meta-4': 2025,
+  'orcl-1': 2021, 'orcl-2': 2021, 'orcl-3': 2026,
+  'ibm-1': 2021, 'ibm-2': 2022,
+  'cw-1': 2023, 'cw-2': 2026,
+  'colo-1': 2020, 'colo-2': 2021, 'colo-3': 2026, 'colo-4': 2022,
+  'nv-1': 2024, 'xai-1': 2024,
+  'cn-1': 2022, 'cn-2': 2022, 'cn-3': 2026, 'cn-4': 2023, 'cn-5': 2026
+};
+
+DATA_CENTERS.forEach((center) => {
+  center.onlineYear = CENTER_ONLINE_YEAR[center.id] ?? 2024;
+});
+
 const HQS = {
   AWS: { lat: 47.62, lon: -122.33 },
   AZURE: { lat: 47.67, lon: -122.12 },
@@ -261,6 +299,7 @@ function statusColor(status) {
 }
 
 const markerById = new Map();
+const centerSceneMeta = new Map();
 DATA_CENTERS.forEach((center) => {
   const position = latLonToVector3(center.lat, center.lon, globeRadius + 0.03);
   const marker = new THREE.Mesh(
@@ -287,7 +326,11 @@ DATA_CENTERS.forEach((center) => {
 
   const hq = HQS[center.operator];
   if (hq && !(hq.lat === center.lat && hq.lon === center.lon)) {
-    arcs.add(createArc(center, hq, 0x70f8c6, 0.12, 2.7));
+    const arc = createArc(center, hq, 0x70f8c6, 0.12, 2.7);
+    arcs.add(arc);
+    centerSceneMeta.set(center.id, { marker, hitTarget, arc });
+  } else {
+    centerSceneMeta.set(center.id, { marker, hitTarget, arc: null });
   }
 });
 
@@ -327,6 +370,7 @@ let activeCenterId = null;
 let focusPoint = null;
 let pointerDownPos = null;
 let draggedSincePointerDown = false;
+let currentTimelineYear = 2019;
 
 controls.addEventListener('start', () => {
   draggedSincePointerDown = true;
@@ -488,6 +532,43 @@ function updateBubbleLab() {
   `;
 }
 
+function timelineEntry(year) {
+  return TIMELINE.find((item) => item.year === year) ?? TIMELINE[0];
+}
+
+function applyTimelineVisibility() {
+  const visibleCenters = DATA_CENTERS.filter((center) => center.onlineYear <= currentTimelineYear);
+  const visibleSet = new Set(visibleCenters.map((center) => center.id));
+
+  centerSceneMeta.forEach((meta, centerId) => {
+    const isVisible = visibleSet.has(centerId);
+    meta.marker.visible = isVisible;
+    meta.hitTarget.visible = isVisible;
+    if (meta.arc) meta.arc.visible = isVisible;
+  });
+
+  if (activeCenterId && !visibleSet.has(activeCenterId)) {
+    const fallback = visibleCenters[visibleCenters.length - 1];
+    if (fallback) selectCenter(fallback, false);
+  }
+
+  updateStats(visibleCenters);
+  renderCenterList(searchInput.value || '');
+}
+
+function setTimelineYear(year) {
+  const clamped = Math.max(2019, Math.min(2030, Math.round(year)));
+  currentTimelineYear = clamped;
+
+  const entry = timelineEntry(clamped);
+  timelineYearEl.innerText = String(clamped);
+  timelinePhaseEl.innerText = entry.phase;
+  timelineDescEl.innerText = entry.desc;
+  timelineSlider.value = String(clamped);
+
+  applyTimelineVisibility();
+}
+
 function selectCenter(center, focus = true) {
   activeCenterId = center.id;
   infoPanel.innerHTML = centerDetailsHtml(center);
@@ -511,6 +592,7 @@ function selectCenter(center, focus = true) {
 function renderCenterList(query = '') {
   const q = query.trim().toLowerCase();
   const filtered = DATA_CENTERS.filter((center) => {
+    if (center.onlineYear > currentTimelineYear) return false;
     const hay = `${center.name} ${center.operator} ${center.status} ${center.models.join(' ')}`.toLowerCase();
     return !q || hay.includes(q);
   });
@@ -535,16 +617,28 @@ function renderCenterList(query = '') {
   });
 }
 
-function updateStats() {
-  const totalPower = DATA_CENTERS.reduce((sum, center) => sum + center.powerMW, 0);
-  const operational = DATA_CENTERS.filter((center) => center.status === 'Operational').length;
-  statSites.innerText = String(DATA_CENTERS.length);
+function updateStats(centers = DATA_CENTERS) {
+  const totalPower = centers.reduce((sum, center) => sum + center.powerMW, 0);
+  const operational = centers.filter((center) => center.status === 'Operational').length;
+  statSites.innerText = String(centers.length);
   statPower.innerText = `${totalPower} MW`;
   statOperational.innerText = String(operational);
 }
 
 searchInput.addEventListener('input', () => {
   renderCenterList(searchInput.value || '');
+});
+
+timelineSlider.addEventListener('input', (event) => {
+  setTimelineYear(Number.parseInt(event.target.value, 10));
+});
+
+timelinePrevBtn.addEventListener('click', () => {
+  setTimelineYear(currentTimelineYear - 1);
+});
+
+timelineNextBtn.addEventListener('click', () => {
+  setTimelineYear(currentTimelineYear + 1);
 });
 
 [rateShockInput, utilizationInput, powerInflationInput, revenueGrowthInput].forEach((input) => {
@@ -601,9 +695,9 @@ window.addEventListener('resize', () => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
-updateStats();
 renderCenterList('');
 selectCenter(DATA_CENTERS[0], false);
+setTimelineYear(2019);
 updateBubbleLab();
 
 function animate() {

@@ -24,6 +24,13 @@
         #info-panel { position: absolute; top: 24px; right: 24px; background: var(--surface); padding: 16px; border: 1px solid var(--border); width: 360px; z-index: 50; line-height: 1.5; max-height: 76vh; overflow: auto; }
         #catalog-panel { position: absolute; top: 106px; left: 24px; width: 360px; max-height: 62vh; overflow: auto; background: rgba(10,10,10,0.94); border: 1px solid var(--border); padding: 12px; z-index: 50; }
         #stats-panel { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); background: rgba(10,10,10,0.9); border: 1px solid var(--border); padding: 10px 14px; z-index: 50; display: flex; gap: 16px; font-size: 10px; }
+        #timeline-panel { position: absolute; top: 106px; left: 398px; width: 320px; background: rgba(8,8,8,0.95); border: 1px solid var(--border); padding: 12px; z-index: 50; }
+        #timeline-year { font-size: 20px; color: #9cf3cb; font-weight: 600; margin: 4px 0; }
+        #timeline-phase { font-size: 10px; opacity: 0.8; margin-bottom: 8px; }
+        #timeline-desc { font-size: 9px; line-height: 1.45; opacity: 0.85; margin-top: 8px; }
+        #timeline-slider { width: 100%; }
+        #timeline-row { display: flex; gap: 6px; margin-top: 8px; }
+        #timeline-row button { flex: 1; padding: 8px 10px; font-size: 9px; }
         #bubble-panel { position: absolute; bottom: 24px; right: 24px; width: 360px; max-height: 44vh; overflow: auto; background: rgba(8,8,8,0.95); border: 1px solid var(--border); padding: 12px; z-index: 50; }
         .bubble-control { margin-bottom: 8px; font-size: 9px; }
         .bubble-control label { display: flex; justify-content: space-between; margin-bottom: 4px; opacity: 0.85; }
@@ -63,8 +70,9 @@
             #header { top: 14px; left: 14px; padding-left: 10px; }
             #stats-panel { top: 72px; left: 14px; transform: none; right: 14px; width: auto; justify-content: space-between; }
             #catalog-panel { display: none; }
+            #timeline-panel { top: 126px; left: 14px; right: 14px; width: auto; }
             #bubble-panel { bottom: 14px; right: 14px; left: 14px; width: auto; max-height: 34vh; }
-            #info-panel { top: 126px; right: 14px; left: 14px; width: auto; padding: 12px; font-size: 10px; max-height: 34vh; }
+            #info-panel { top: 286px; right: 14px; left: 14px; width: auto; padding: 12px; font-size: 10px; max-height: 24vh; }
             #ctrl-btns { left: 14px; bottom: 14px; right: 14px; }
             button { width: 100%; }
             #hint { display: none; }
@@ -88,6 +96,18 @@
         <div class="panel-title">GLOBAL AI DATA CENTER INDEX</div>
         <input id="search-centers" placeholder="SEARCH REGION / OPERATOR / MODEL" />
         <div id="center-list"></div>
+    </div>
+
+    <div id="timeline-panel">
+        <div class="panel-title">TIMELINE // 2019-2030</div>
+        <div id="timeline-year">2019</div>
+        <div id="timeline-phase">BOOTSTRAP PHASE</div>
+        <input id="timeline-slider" type="range" min="2019" max="2030" step="1" value="2019">
+        <div id="timeline-row">
+            <button id="timeline-prev">PREV YEAR</button>
+            <button id="timeline-next">NEXT YEAR</button>
+        </div>
+        <div id="timeline-desc">EARLY GPU SCARCITY, MODEST DEBT LOADS, EXPERIMENTAL MODEL ECONOMICS.</div>
     </div>
 
     <div id="info-panel">
