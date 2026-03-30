@@ -1,22 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Infrastructure Tracker</title>
+    <title>AI Impact Tracker</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #050505; color: white; font-family: sans-serif; }
+        body { margin: 0; overflow: hidden; background: #020205; color: white; font-family: sans-serif; }
         #ui { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); text-align: center; width: 80%; }
-        input { width: 100%; cursor: pointer; }
+        #info-panel { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 20px; border-radius: 12px; border: 1px solid #333; width: 250px; }
+        input { width: 100%; cursor: pointer; accent-color: #ff3300; }
         #header { position: absolute; top: 20px; left: 20px; }
+        .impact-red { color: #ff3300; font-weight: bold; }
     </style>
 </head>
 <body>
     <div id="header">
-        <h1>Global AI Data Centers</h1>
-        <p>Tracking the physical growth of the AI era.</p>
+        <h1>Global AI Impact</h1>
+        <p>Tracking the <span class="impact-red">Environmental Cost</span> of Artificial Intelligence.</p>
+    </div>
+    <div id="info-panel">
+        <p>Select a date on the timeline to see facility impact data.</p>
     </div>
     <div id="ui">
         <h2 id="date-label">2024-01</h2>
-        <input type="range" min="0" max="5" value="0" oninput="updateTimeline(this.value)">
+        <input type="range" min="0" max="9" value="0" oninput="updateTimeline(this.value)">
     </div>
     <script type="module" src="/main.js"></script>
 </body>
