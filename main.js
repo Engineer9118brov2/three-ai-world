@@ -436,6 +436,8 @@ let draggedSincePointerDown = false;
 let currentTimelineYear = 2019;
 let timelineTimer = null;
 let spaceTransition = 0;
+let simplifiedMode = false;
+let storyModeActive = false;
 
 const SPACE_ZOOM_START = 14;
 const SPACE_ZOOM_FULL = 36;
@@ -891,7 +893,6 @@ const storyExitBtn = document.getElementById('story-exit');
 const storyPlayBtn = document.getElementById('story-play');
 const storyModeBtn = document.getElementById('btn-story-mode');
 
-let storyModeActive = false;
 let storyTimer = null;
 
 function renderStoryCard(year) {
@@ -959,7 +960,6 @@ if (storyPlayBtn) storyPlayBtn.addEventListener('click', () => { if (storyTimer)
 
 // ─── SIMPLIFIED VIEW ────────────────────────────────────────────────────────────
 
-let simplifiedMode = false;
 const simplifiedBtnEl = document.getElementById('btn-simplified');
 
 function simplifiedStatusLabel(status) {
