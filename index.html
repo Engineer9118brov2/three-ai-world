@@ -1,1 +1,23 @@
-<!DOCTYPE html><html><body><script type="module" src="/main.js"></script></body></html>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Infrastructure Tracker</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #050505; color: white; font-family: sans-serif; }
+        #ui { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); text-align: center; width: 80%; }
+        input { width: 100%; cursor: pointer; }
+        #header { position: absolute; top: 20px; left: 20px; }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>Global AI Data Centers</h1>
+        <p>Tracking the physical growth of the AI era.</p>
+    </div>
+    <div id="ui">
+        <h2 id="date-label">2024-01</h2>
+        <input type="range" min="0" max="5" value="0" oninput="updateTimeline(this.value)">
+    </div>
+    <script type="module" src="/main.js"></script>
+</body>
+</html>
