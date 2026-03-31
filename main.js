@@ -707,7 +707,15 @@ function setTimelineYear(year) {
 
 function selectCenter(center, focus = true) {
   activeCenterId = center.id;
-  infoPanel.innerHTML = simplifiedMode ? renderSimplifiedInfoHtml(center) : centerDetailsHtml(center);
+  
+  // Update info content but respect current mode
+  const siteHtml = simplifiedMode ? renderSimplifiedInfoHtml(center) : centerDetailsHtml(center);
+  const infoContentEl = document.getElementById('info-content');
+  if (infoContentEl && currentInfoMode === 'site') {
+    infoContentEl.innerHTML = siteHtml;
+  }
+  // Store the site HTML so we can switch back to it
+  lastSiteHtml = siteHtml;
 
   markerById.forEach((marker, id) => {
     const material = marker.material;
@@ -724,6 +732,77 @@ function selectCenter(center, focus = true) {
   renderCenterList(searchInput.value || '');
   updateBubbleLab();
 }
+
+// ─── AI KNOWLEDGE BASE ─────────────────────────────────────────────────────────
+
+let currentInfoMode = 'site';
+let lastSiteHtml = '[SYSTEM ONLINE]<br>SELECT A SITE FOR FULL IMPACT + MODEL BREAKDOWN.';
+
+const AI_KNOWLEDGE = {
+  basics: {
+    title: 'AI FUNDAMENTALS',
+    content: `
+      <b>What is AI?</b> AI refers to computer systems capable of performing tasks that typically require human intelligence.
+      <br><br><b>How it works:</b> Modern AI (Machine Learning) uses Neural Networks inspired by the brain. They are trained on massive datasets to recognize patterns and make predictions.
+      <br><br><b>Key Breakthroughs:</b>
+      <ul>
+        <li><b>The Transformer (2017):</b> The architecture behind GPT, allowing AI to process data in parallel and understand context.</li>
+        <li><b>GPU Acceleration:</b> Using graphics chips (NVIDIA) to perform the billions of math operations needed for training.</li>
+      </ul>
+    `
+  },
+  climate: {
+    title: 'AI & CLIMATE IMPACT',
+    content: `
+      <b>The Energy Cost:</b> Training a single large model can consume as much energy as 100 homes use in a year.
+      <br><br><b>Water Usage:</b> Data centers require millions of gallons of water for cooling. Microsoft and Google have reported significant spikes in water consumption due to AI demand.
+      <br><br><b>Global Warming:</b> As AI capex explodes, the demand for power is often met by fossil fuels when grids are stressed, complicating global net-zero goals.
+    `
+  },
+  bubble: {
+    title: 'THE DEBT BUBBLE',
+    content: `
+      <b>The Thesis:</b> Mark Tilbury and other analysts warn of an "AI Debt Bubble." Companies are borrowing billions to buy GPUs (Capex) before they have proven AI can generate matching profits (ROI).
+      <br><br><b>The Risk:</b> If AI adoption slows, companies may be stuck with massive debt and underutilized hardware, leading to a market crash similar to the Dot-com bubble.
+    `
+  }
+};
+
+window.showInfoMode = function(mode) {
+  currentInfoMode = mode;
+  const contentEl = document.getElementById('info-content');
+  const btnSite = document.getElementById('btn-info-site');
+  const btnKb = document.getElementById('btn-info-kb');
+
+  if (mode === 'site') {
+    contentEl.innerHTML = lastSiteHtml;
+    btnSite.style.opacity = '1';
+    btnKb.style.opacity = '0.5';
+  } else {
+    contentEl.innerHTML = `
+      <div style="font-size:11px;color:#adffd8;margin-bottom:10px;">AI KNOWLEDGE BASE</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button onclick="renderKbArticle('basics')" style="padding:6px;font-size:9px;text-align:left;">1. AI BASICS</button>
+        <button onclick="renderKbArticle('climate')" style="padding:6px;font-size:9px;text-align:left;">2. CLIMATE IMPACT</button>
+        <button onclick="renderKbArticle('bubble')" style="padding:6px;font-size:9px;text-align:left;">3. DEBT BUBBLE</button>
+      </div>
+      <div id="kb-article" style="margin-top:12px;font-size:10px;line-height:1.4;border-top:1px solid #333;padding-top:10px;">
+        Select a topic above to learn more about AI history and risks.
+      </div>
+    `;
+    btnSite.style.opacity = '0.5';
+    btnKb.style.opacity = '1';
+  }
+};
+
+window.renderKbArticle = function(key) {
+  const article = AI_KNOWLEDGE[key];
+  const artEl = document.getElementById('kb-article');
+  if (artEl) {
+    artEl.innerHTML = `<b>${article.title}</b><br><br>${article.content}`;
+  }
+};
+
 
 function renderCenterList(query = '') {
   const q = query.trim().toLowerCase();
@@ -873,18 +952,18 @@ updateBubbleLab();
 // ─── STORY MODE ────────────────────────────────────────────────────────────────
 
 const STORY_CHAPTERS = {
-  2019: { title: 'THE FOUNDATION', headline: 'Before the gold rush', story: 'AI is moving from research curiosity to real product. A handful of data centers house early large-model experiments. Balance sheets are clean, debt is manageable. Nobody yet knows the boom is coming.', stat: '~8 major AI data centers online globally' },
-  2020: { title: 'DIGITAL ACCELERATION', headline: 'Pandemic rewrites the roadmap', story: 'Lockdowns force the world online overnight. Cloud demand spikes 40%. GPU orders quietly accelerate. Cheap credit makes big infrastructure bets easy to justify — the quiet buildup begins.', stat: 'Cloud spend grows 40% YoY; interest rates near zero' },
-  2021: { title: 'SCALE-UP ERA', headline: 'Large models become serious business', story: 'Enterprises commit to multi-year cloud contracts. Foundation model training budgets multiply. Power contracts spanning decades get signed. The infrastructure race is on — everyone is locking in capacity.', stat: 'Training compute doubles every ~6 months' },
-  2022: { title: 'THE INFLECTION POINT', headline: 'ChatGPT launches. Everything changes.', story: 'One product launch reshapes investor expectations globally. Capital markets reward AI growth at any cost. Debt-backed expansion becomes trivially easy to justify. The narrative overwhelms the numbers.', stat: '$100B+ in new AI commitments announced in 90 days' },
-  2023: { title: 'THE GPU SCRAMBLE', headline: 'Everyone wants H100s. Nobody has enough.', story: 'Data center retrofits, GPU lease premiums, and colocation deals spike. Execution risk rises as operators race to add capacity faster than infrastructure can absorb it. The bubble begins to inflate.', stat: 'H100 spot prices hit $40K+; 12-month wait lists form' },
-  2024: { title: 'HYPERSCALE CAPEX CYCLE', headline: 'The biggest infrastructure bet in history', story: 'AWS, Azure, Google, and Meta collectively pledge over $300B in AI capex. The narrative shifts from "can we build it?" to "can we monetize it?" Utilization starts to slip as supply outpaces demand.', stat: '$300B+ combined 2024 AI capex pledges from top-4 operators' },
-  2025: { title: 'MONETIZATION TEST', headline: 'Now you have to show the money.', story: 'Revenue per token and enterprise AI conversion rates become the metrics that matter. Investors start asking hard questions. Weak utilization hurts margins. The easy credit phase is ending.', stat: 'Average GPU cluster utilization drops below 80%' },
-  2026: { title: 'DEBT REPRICING WINDOW', headline: 'Rates stay higher. Refinancing bites.', story: 'Debt maturities cluster. Operators who over-borrowed at low rates now refinance at higher ones. Interest coverage ratios deteriorate. Operators with thin margins face real stress for the first time.', stat: '$200B+ in AI-linked debt maturing 2026–2028' },
-  2027: { title: 'CONSOLIDATION RISK', headline: 'The weakest clusters face write-downs.', story: 'If demand growth slows, overbuilt GPU clusters become stranded assets. Efficiency gains from smaller models reduce compute demand per output. Older facilities struggle to stay economically viable.', stat: 'Estimated 15–25% of installed AI capacity sits underutilized' },
-  2028: { title: 'EFFICIENCY WARS', headline: 'Doing more with less becomes survival.', story: 'Model compression and inference optimization slash compute costs per output. Weaker, less-efficient data centers lose workloads to modern facilities. The market bifurcates: lean operators pull ahead.', stat: 'Inference cost per 1M tokens falls 80% from 2023 peak' },
-  2029: { title: 'RESET OR RE-ACCELERATION', headline: 'The market picks its winners.', story: 'High-utilization, well-capitalized operators compound their advantage. Over-levered players cut capex aggressively and sell assets. A second demand wave from new applications may rescue some — or not.', stat: 'Top-3 operators hold 60%+ of profitable AI workloads' },
-  2030: { title: 'THE NEW BASELINE', headline: 'AI infrastructure becomes a utility.', story: 'For survivors, AI infrastructure settles into utility-like economics — stable margins, long contracts, predictable demand. Debt discipline decided who made it. The frontier has moved to space and energy abundance.', stat: 'AI data center market consolidates to ~8 dominant operators' }
+  2019: { title: 'THE FOUNDATION', headline: 'Transformer Breakthrough & Deep Learning', story: 'The 2017 "Attention Is All You Need" paper sets the stage. AI shifts from niche research to real products as Large Language Models (LLMs) begin to scale. Early data centers house experiments that will soon reshape the world.', stat: 'Compute used for largest AI training runs grows 10x per year' },
+  2020: { title: 'DIGITAL ACCELERATION', headline: 'GPT-3 & The Pandemic Shock', story: 'Lockdowns force the world online. GPT-3 proves that scaling parameters leads to emergent reasoning. Cloud demand spikes 40%, and the GPU arms race begins as companies realize intelligence is the new oil.', stat: 'GPT-3 released with 175B parameters' },
+  2021: { title: 'SCALE-UP ERA', headline: 'Foundation Models & Enterprise Bet', story: 'AI becomes serious business. Multi-year cloud contracts are signed to lock in GPU capacity. The environmental cost becomes visible as training runs consume massive amounts of electricity and water for cooling.', stat: 'Training compute doubles every ~6 months' },
+  2022: { title: 'THE INFLECTION POINT', headline: 'ChatGPT & The Global AI Fever', story: 'ChatGPT launches, reaching 100M users in record time. Capital markets reward AI growth at any cost. Debt-backed expansion becomes easy to justify as the "Gold Rush" narrative overwhelms fiscal discipline.', stat: '$100B+ in new AI commitments announced in 90 days' },
+  2023: { title: 'THE GPU SCRAMBLE', headline: 'NVIDIA H100s & The Scarcity War', story: 'GPU lease premiums and data center retrofits spike. The carbon footprint of AI training becomes a major climate concern. Execution risk rises as operators race to add capacity faster than the grid can support.', stat: 'H100 spot prices hit $40K+; 12-month wait lists form' },
+  2024: { title: 'HYPERSCALE CAPEX CYCLE', headline: 'The $300B Infrastructure Gamble', story: 'Hyperscalers pledge massive capex. The narrative shifts to monetization pressure. If usage doesn\'t convert to revenue, the massive debt used to buy these GPUs could trigger a financial reset.', stat: '$300B+ combined 2024 AI capex pledges' },
+  2025: { title: 'MONETIZATION TEST', headline: 'The ROI Crisis & Climate Pressure', story: 'Revenue per token becomes the metric that matters. AI\'s contribution to global warming via power consumption is now a global policy issue. Weak utilization starts to hurt margins and investor confidence.', stat: 'Data center power use projected to double by 2026' },
+  2026: { title: 'DEBT REPRICING WINDOW', headline: 'The Bubble Meets Reality', story: 'Mark Tilbury\'s "AI Debt Bubble" thesis takes center stage. Debt maturities cluster, and interest coverage ratios deteriorate. The cost of capital rises, forcing a reckoning for over-leveraged operators.', stat: '$200B+ in AI-linked debt maturing 2026–2028' },
+  2027: { title: 'CONSOLIDATION RISK', headline: 'Stranded Assets & Model Efficiency', story: 'Overbuilt GPU clusters risk becoming stranded assets. Efficiency gains in model architecture mean less compute is needed for the same output, leaving weaker data centers underutilized and underwater.', stat: 'Estimated 15–25% of installed AI capacity sits underutilized' },
+  2028: { title: 'EFFICIENCY WARS', headline: 'Survival of the Leanest', story: 'Inference optimization slashes costs. Modern, liquid-cooled facilities survive while older air-cooled data centers struggle. The market bifurcates into "Compute-Rich" and "Debt-Burdened" players.', stat: 'Inference cost per 1M tokens falls 80% from 2023 peak' },
+  2029: { title: 'RESET OR RE-ACCELERATION', headline: 'The Great AI Consolidation', story: 'High-utilization winners compound their advantage. Over-levered players sell assets. Climate-conscious "Green AI" becomes the new standard for the survivors of the debt cycle.', stat: 'Top-3 operators hold 60%+ of profitable AI workloads' },
+  2030: { title: 'THE NEW BASELINE', headline: 'AI as a Global Utility', story: 'AI infrastructure matures into stable, utility-like economics. The frontier moves to energy abundance and space-based compute to escape Earth\'s power constraints. Debt discipline decided who made it.', stat: 'AI data center market consolidates to ~8 dominant operators' }
 };
 
 const storyOverlayEl = document.getElementById('story-overlay');

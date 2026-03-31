@@ -182,7 +182,13 @@
 
     <!-- Info panel: top-right -->
     <div id="info-panel">
-        [SYSTEM ONLINE]<br>SELECT A SITE FOR FULL IMPACT + MODEL BREAKDOWN.
+        <div id="info-nav" style="display:flex;gap:10px;margin-bottom:12px;border-bottom:1px solid #333;padding-bottom:8px;">
+            <button id="btn-info-site" class="nav-active" onclick="showInfoMode('site')" style="padding:4px 8px;border:none;background:none;color:#fff;cursor:pointer;font-size:9px;opacity:1;">SITE INTEL</button>
+            <button id="btn-info-kb" onclick="showInfoMode('kb')" style="padding:4px 8px;border:none;background:none;color:#fff;cursor:pointer;font-size:9px;opacity:0.5;">AI KNOWLEDGE</button>
+        </div>
+        <div id="info-content">
+            [SYSTEM ONLINE]<br>SELECT A SITE FOR FULL IMPACT + MODEL BREAKDOWN.
+        </div>
     </div>
 
     <!-- Bubble panel: right, below info, collapsible -->
@@ -195,7 +201,7 @@
         <div id="bubble-body" class="bubble-hidden">
             <div style="font-size:9px;opacity:0.75;line-height:1.45;margin-top:8px;">
                 MODELS THE DEBT-CYCLE THESIS FROM MARKET COMMENTARY.
-                <a href="https://www.youtube.com/watch?v=C6eXTvqdaro" target="_blank" rel="noopener noreferrer">REFERENCE VIDEO</a>
+                <a href="https://www.youtube.com/watch?v=C6eXTvqdaro" target="_blank" rel="noopener noreferrer" style="color:#8fffd0;text-decoration:underline;">MARK TILBURY: THE AI DEBT BUBBLE</a>
             </div>
             <div class="bubble-control">
                 <label>INTEREST RATE SHOCK <span id="rate-shock-val">0.0%</span></label>
