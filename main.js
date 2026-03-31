@@ -1051,6 +1051,12 @@ function renderStoryCard(year) {
   storyNextBtn.innerText = year >= 2030 ? 'FINISH' : 'NEXT CHAPTER';
 
   setTimelineYear(year);
+
+  // Auto-select a key center for the year to guide the camera
+  const yearCenters = DATA_CENTERS.filter(c => c.onlineYear === year);
+  if (yearCenters.length > 0) {
+    selectCenter(yearCenters[0], true);
+  }
 }
 
 function stopStoryPlayback() {
