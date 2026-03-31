@@ -192,17 +192,17 @@ const OPERATOR_LINKS = {
 };
 
 const BUBBLE_OPERATORS = {
-  AWS: { debtB: 67, capexB: 54, revenueB: 107, ebitdaMargin: 0.38, baseRate: 4.5, aiShare: 0.24 },
-  AZURE: { debtB: 80, capexB: 58, revenueB: 130, ebitdaMargin: 0.42, baseRate: 4.2, aiShare: 0.22 },
-  GOOGLE: { debtB: 30, capexB: 52, revenueB: 101, ebitdaMargin: 0.36, baseRate: 4.1, aiShare: 0.2 },
-  META: { debtB: 50, capexB: 45, revenueB: 68, ebitdaMargin: 0.34, baseRate: 4.7, aiShare: 0.3 },
-  ORACLE: { debtB: 92, capexB: 24, revenueB: 53, ebitdaMargin: 0.31, baseRate: 5.2, aiShare: 0.19 },
-  IBM: { debtB: 57, capexB: 14, revenueB: 31, ebitdaMargin: 0.24, baseRate: 5.4, aiShare: 0.12 },
-  COREWEAVE: { debtB: 21, capexB: 13, revenueB: 4.8, ebitdaMargin: 0.18, baseRate: 8.5, aiShare: 0.72 },
-  COLOCATION: { debtB: 120, capexB: 28, revenueB: 39, ebitdaMargin: 0.29, baseRate: 6.1, aiShare: 0.28 },
-  NVIDIA: { debtB: 14, capexB: 9, revenueB: 80, ebitdaMargin: 0.52, baseRate: 3.8, aiShare: 0.64 },
-  XAI: { debtB: 12, capexB: 11, revenueB: 1.5, ebitdaMargin: 0.08, baseRate: 9.2, aiShare: 0.9 },
-  CHINA: { debtB: 210, capexB: 78, revenueB: 95, ebitdaMargin: 0.2, baseRate: 5.0, aiShare: 0.34 }
+  AWS: { debtB: 67, capexB: 54, revenueB: 107, ebitdaMargin: 0.38, baseRate: 4.5, aiShare: 0.24, maturityYear: 2026, riskScore: 32 },
+  AZURE: { debtB: 80, capexB: 58, revenueB: 130, ebitdaMargin: 0.42, baseRate: 4.2, aiShare: 0.22, maturityYear: 2026, riskScore: 28 },
+  GOOGLE: { debtB: 30, capexB: 52, revenueB: 101, ebitdaMargin: 0.36, baseRate: 4.1, aiShare: 0.2, maturityYear: 2027, riskScore: 24 },
+  META: { debtB: 50, capexB: 45, revenueB: 68, ebitdaMargin: 0.34, baseRate: 4.7, aiShare: 0.3, maturityYear: 2026, riskScore: 38 },
+  ORACLE: { debtB: 92, capexB: 24, revenueB: 53, ebitdaMargin: 0.31, baseRate: 5.2, aiShare: 0.19, maturityYear: 2025, riskScore: 54 },
+  IBM: { debtB: 57, capexB: 14, revenueB: 31, ebitdaMargin: 0.24, baseRate: 5.4, aiShare: 0.12, maturityYear: 2025, riskScore: 48 },
+  COREWEAVE: { debtB: 21, capexB: 13, revenueB: 4.8, ebitdaMargin: 0.18, baseRate: 8.5, aiShare: 0.72, maturityYear: 2025, riskScore: 78 },
+  COLOCATION: { debtB: 120, capexB: 28, revenueB: 39, ebitdaMargin: 0.29, baseRate: 6.1, aiShare: 0.28, maturityYear: 2026, riskScore: 65 },
+  NVIDIA: { debtB: 14, capexB: 9, revenueB: 80, ebitdaMargin: 0.52, baseRate: 3.8, aiShare: 0.64, maturityYear: 2027, riskScore: 12 },
+  XAI: { debtB: 12, capexB: 11, revenueB: 1.5, ebitdaMargin: 0.08, baseRate: 9.2, aiShare: 0.9, maturityYear: 2024, riskScore: 82 },
+  CHINA: { debtB: 210, capexB: 78, revenueB: 95, ebitdaMargin: 0.2, baseRate: 5.0, aiShare: 0.34, maturityYear: 2026, riskScore: 58 }
 };
 
 const DATA_CENTERS = [
@@ -549,15 +549,18 @@ function updateBubbleLab() {
   revenueGrowthVal.innerText = `${params.revenueGrowth.toFixed(0)}%`;
 
   const results = Object.keys(BUBBLE_OPERATORS)
-    .map((operator) => simulateOperator(operator, params))
+    .map((operator) => {
+      const res = simulateOperator(operator, params);
+      const maturityPressure = currentTimelineYear >= BUBBLE_OPERATORS[operator].maturityYear ? 1.25 : 1.0;
+      res.score = Math.min(100, res.score * maturityPressure); // Inflate risk if near/past maturity year
+      res.risk = riskBand(res.score);
+      return res;
+    })
     .filter(Boolean)
     .sort((a, b) => b.score - a.score);
 
   const marketBubble = results.reduce((sum, row) => sum + row.score, 0) / Math.max(results.length, 1);
   const atRisk = results.filter((row) => row.score >= 68).length;
-  const chinaVsUs =
-    (results.find((row) => row.operator === 'CHINA')?.score ?? 0) -
-    (results.find((row) => row.operator === 'AWS')?.score ?? 0);
   const globalRisk = riskBand(marketBubble);
 
   const quickSummaryEl = document.getElementById('bubble-quick-summary');
@@ -566,10 +569,10 @@ function updateBubbleLab() {
   }
 
   bubbleSummary.innerHTML = [
+    `<div style="font-size:10px;margin-bottom:8px;border-bottom:1px solid #333;padding-bottom:4px;">MARKET STRESS ANALYSIS</div>`,
     `GLOBAL BUBBLE INDEX: <span class="${globalRisk.className}">${marketBubble.toFixed(1)} / 100 (${globalRisk.label})</span><br>`,
     `OPERATORS IN HIGH-RISK ZONE: ${atRisk}/${results.length}<br>`,
-    `CHINA VS US STRESS SPREAD (CHINA-AWS): ${chinaVsUs >= 0 ? '+' : ''}${chinaVsUs.toFixed(1)}<br>`,
-    `THESIS: IF UTILIZATION DROPS WHILE RATES/POWER RISE, CASH BURN + DEBT ROLLOVER PRESSURE CAN FORCE A CAPEX RESET.`
+    `<div style="margin-top:8px;font-size:9px;opacity:0.8;color:#ff7676;"><b>MATURITY WALL WARNING:</b> MAJOR REFINANCING DUE IN 2025–2026. RE-PRICING DEBT AT HIGHER RATES IS THE PRIMARY BUBBLE TRIGGER.</div>`
   ].join('');
 
   bubbleGrid.innerHTML = `
@@ -578,7 +581,7 @@ function updateBubbleLab() {
         <tr>
           <th>Operator</th>
           <th>Risk</th>
-          <th>Debt/Op</th>
+          <th>Maturity</th>
           <th>Int Cov</th>
           <th>FCF</th>
         </tr>
@@ -587,11 +590,13 @@ function updateBubbleLab() {
         ${results
           .map((row) => {
             const active = row.operator === (DATA_CENTERS.find((center) => center.id === activeCenterId)?.operator ?? '');
+            const mYear = BUBBLE_OPERATORS[row.operator].maturityYear;
+            const isCritical = mYear <= currentTimelineYear;
             return `
               <tr style="${active ? 'background:#173226;' : ''}">
                 <td>${row.operator}</td>
                 <td class="${row.risk.className}">${row.score.toFixed(0)}</td>
-                <td>${row.debtToOp.toFixed(1)}x</td>
+                <td style="${isCritical ? 'color:#ff7676;font-weight:bold;' : ''}">${mYear}</td>
                 <td>${row.coverage.toFixed(1)}x</td>
                 <td>${formatB(row.freeCash)}</td>
               </tr>
