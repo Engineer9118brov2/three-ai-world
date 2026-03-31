@@ -192,17 +192,17 @@ const OPERATOR_LINKS = {
 };
 
 const BUBBLE_OPERATORS = {
-  AWS: { debtB: 67, capexB: 54, revenueB: 107, ebitdaMargin: 0.38, baseRate: 4.5, aiShare: 0.24, maturityYear: 2026, riskScore: 32 },
-  AZURE: { debtB: 80, capexB: 58, revenueB: 130, ebitdaMargin: 0.42, baseRate: 4.2, aiShare: 0.22, maturityYear: 2026, riskScore: 28 },
-  GOOGLE: { debtB: 30, capexB: 52, revenueB: 101, ebitdaMargin: 0.36, baseRate: 4.1, aiShare: 0.2, maturityYear: 2027, riskScore: 24 },
-  META: { debtB: 50, capexB: 45, revenueB: 68, ebitdaMargin: 0.34, baseRate: 4.7, aiShare: 0.3, maturityYear: 2026, riskScore: 38 },
-  ORACLE: { debtB: 92, capexB: 24, revenueB: 53, ebitdaMargin: 0.31, baseRate: 5.2, aiShare: 0.19, maturityYear: 2025, riskScore: 54 },
-  IBM: { debtB: 57, capexB: 14, revenueB: 31, ebitdaMargin: 0.24, baseRate: 5.4, aiShare: 0.12, maturityYear: 2025, riskScore: 48 },
-  COREWEAVE: { debtB: 21, capexB: 13, revenueB: 4.8, ebitdaMargin: 0.18, baseRate: 8.5, aiShare: 0.72, maturityYear: 2025, riskScore: 78 },
-  COLOCATION: { debtB: 120, capexB: 28, revenueB: 39, ebitdaMargin: 0.29, baseRate: 6.1, aiShare: 0.28, maturityYear: 2026, riskScore: 65 },
-  NVIDIA: { debtB: 14, capexB: 9, revenueB: 80, ebitdaMargin: 0.52, baseRate: 3.8, aiShare: 0.64, maturityYear: 2027, riskScore: 12 },
-  XAI: { debtB: 12, capexB: 11, revenueB: 1.5, ebitdaMargin: 0.08, baseRate: 9.2, aiShare: 0.9, maturityYear: 2024, riskScore: 82 },
-  CHINA: { debtB: 210, capexB: 78, revenueB: 95, ebitdaMargin: 0.2, baseRate: 5.0, aiShare: 0.34, maturityYear: 2026, riskScore: 58 }
+  AWS: { debtB: 67, capexB: 54, revenueB: 107, ebitdaMargin: 0.38, baseRate: 4.5, aiShare: 0.24, maturityYear: 2026, riskScore: 32, debtToEquity: 0.45, cashB: 82 },
+  AZURE: { debtB: 80, capexB: 58, revenueB: 130, ebitdaMargin: 0.42, baseRate: 4.2, aiShare: 0.22, maturityYear: 2026, riskScore: 28, debtToEquity: 0.38, cashB: 105 },
+  GOOGLE: { debtB: 30, capexB: 52, revenueB: 101, ebitdaMargin: 0.36, baseRate: 4.1, aiShare: 0.2, maturityYear: 2027, riskScore: 24, debtToEquity: 0.22, cashB: 110 },
+  META: { debtB: 50, capexB: 45, revenueB: 68, ebitdaMargin: 0.34, baseRate: 4.7, aiShare: 0.3, maturityYear: 2026, riskScore: 38, debtToEquity: 0.31, cashB: 65 },
+  ORACLE: { debtB: 92, capexB: 24, revenueB: 53, ebitdaMargin: 0.31, baseRate: 5.2, aiShare: 0.19, maturityYear: 2025, riskScore: 54, debtToEquity: 1.15, cashB: 12 },
+  IBM: { debtB: 57, capexB: 14, revenueB: 31, ebitdaMargin: 0.24, baseRate: 5.4, aiShare: 0.12, maturityYear: 2025, riskScore: 48, debtToEquity: 0.95, cashB: 14 },
+  COREWEAVE: { debtB: 21, capexB: 13, revenueB: 4.8, ebitdaMargin: 0.18, baseRate: 8.5, aiShare: 0.72, maturityYear: 2025, riskScore: 78, debtToEquity: 2.4, cashB: 1.8 },
+  COLOCATION: { debtB: 120, capexB: 28, revenueB: 39, ebitdaMargin: 0.29, baseRate: 6.1, aiShare: 0.28, maturityYear: 2026, riskScore: 65, debtToEquity: 1.8, cashB: 4.2 },
+  NVIDIA: { debtB: 14, capexB: 9, revenueB: 80, ebitdaMargin: 0.52, baseRate: 3.8, aiShare: 0.64, maturityYear: 2027, riskScore: 12, debtToEquity: 0.15, cashB: 32 },
+  XAI: { debtB: 12, capexB: 11, revenueB: 1.5, ebitdaMargin: 0.08, baseRate: 9.2, aiShare: 0.9, maturityYear: 2024, riskScore: 82, debtToEquity: 3.2, cashB: 0.5 },
+  CHINA: { debtB: 210, capexB: 78, revenueB: 95, ebitdaMargin: 0.2, baseRate: 5.0, aiShare: 0.34, maturityYear: 2026, riskScore: 58, debtToEquity: 1.4, cashB: 45 }
 };
 
 const DATA_CENTERS = [
@@ -464,15 +464,22 @@ function centerDetailsHtml(center) {
   const links = centerLinks(center)
     .map((link) => `<div><a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.label}</a></div>`)
     .join('');
+  
+  const fin = BUBBLE_OPERATORS[center.operator] || { debtToEquity: 'N/A', cashB: 'N/A', riskScore: 'N/A' };
 
   return [
     `<div style="font-size:13px;color:#adffd8;margin-bottom:8px;">${center.name}</div>`,
     `<div><b>Operator:</b> ${center.operator}</div>`,
     `<div><b>Status:</b> ${center.status}</div>`,
-    `<div><b>Estimated Power:</b> ${center.powerMW} MW</div>`,
-    `<div><b>Estimated Capacity:</b> ${center.estGPUs.toLocaleString()} GPUs</div>`,
-    `<div><b>Hardware Spec:</b> <span style="color:#ffd700;">${center.chipType}</span></div>`,
-    `<div><b>Role:</b> ${center.role}</div>`,
+    `<div style="margin-top:8px;border-top:1px solid #333;padding-top:8px;"><b>Operator Financial Health:</b></div>`,
+    `<div>Debt-to-Equity: ${fin.debtToEquity}x</div>`,
+    `<div>Cash Reserves: $${fin.cashB}B</div>`,
+    `<div>Bubble Risk Base: ${fin.riskScore}/100</div>`,
+    `<div style="margin-top:8px;border-top:1px solid #333;padding-top:8px;"><b>Technical Specs:</b></div>`,
+    `<div>Estimated Power: ${center.powerMW} MW</div>`,
+    `<div>Estimated Capacity: ${center.estGPUs.toLocaleString()} GPUs</div>`,
+    `<div>Hardware Spec: <span style="color:#ffd700;">${center.chipType}</span></div>`,
+    `<div>Role: ${center.role}</div>`,
     `<div style="margin-top:8px;"><b>Model Coverage (Likely):</b></div>`,
     `<div>${modelTags || 'No model details available.'}</div>`,
     `<div style="margin-top:8px;"><b>Environmental Impact:</b></div>`,
@@ -535,7 +542,9 @@ function simulateOperator(operator, params) {
     coverage,
     capexRatio,
     score,
-    risk: riskBand(score)
+    risk: riskBand(score),
+    debtToEquity: base.debtToEquity,
+    cashB: base.cashB
   };
 }
 
@@ -592,8 +601,8 @@ function updateBubbleLab() {
         <tr>
           <th>Operator</th>
           <th>Risk</th>
-          <th>Maturity</th>
-          <th>Int Cov</th>
+          <th>Cash</th>
+          <th>D/E</th>
           <th>FCF</th>
         </tr>
       </thead>
@@ -601,14 +610,12 @@ function updateBubbleLab() {
         ${results
           .map((row) => {
             const active = row.operator === (DATA_CENTERS.find((center) => center.id === activeCenterId)?.operator ?? '');
-            const mYear = BUBBLE_OPERATORS[row.operator].maturityYear;
-            const isCritical = mYear <= currentTimelineYear;
             return `
               <tr style="${active ? 'background:#173226;' : ''}">
                 <td>${row.operator}</td>
                 <td class="${row.risk.className}">${row.score.toFixed(0)}</td>
-                <td style="${isCritical ? 'color:#ff7676;font-weight:bold;' : ''}">${mYear}</td>
-                <td>${row.coverage.toFixed(1)}x</td>
+                <td>$${row.cashB}B</td>
+                <td>${row.debtToEquity}x</td>
                 <td>${formatB(row.freeCash)}</td>
               </tr>
             `;
