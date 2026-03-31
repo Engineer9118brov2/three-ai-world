@@ -254,7 +254,8 @@ const DATA_CENTERS = [
   { id: 'cn-2', name: 'Tencent Qingyuan Cluster', operator: 'CHINA', lat: 23.68, lon: 113.06, status: 'Operational', powerMW: 320, estGPUs: 73000, co2Tons: 135000, models: ['Hunyuan family', 'Multimodal assistants'], cooling: 'Hybrid chilled water', waterRisk: 'High', gridRisk: 'Medium', jobs: '520 / 1500', role: 'South China inference and AI cloud serving.' },
   { id: 'cn-3', name: 'Baidu Yangquan AI DC', operator: 'CHINA', lat: 37.86, lon: 113.58, status: 'Expansion', powerMW: 280, estGPUs: 64000, co2Tons: 110000, models: ['ERNIE family', 'Autonomous driving models'], cooling: 'Free-air + liquid assist', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '430 / 1300', role: 'Search + autonomous AI workloads.' },
   { id: 'cn-4', name: 'Huawei Guizhou Region', operator: 'CHINA', lat: 26.65, lon: 106.63, status: 'Operational', powerMW: 340, estGPUs: 77000, co2Tons: 15000, models: ['Pangu family', 'Enterprise copilot models'], cooling: 'Low-ambient optimized', waterRisk: 'Medium', gridRisk: 'Low', jobs: '570 / 1700', role: 'Domestic enterprise model platform backend.' },
-  { id: 'cn-5', name: 'ByteDance Ulanqab Hub', operator: 'CHINA', lat: 41.03, lon: 113.12, status: 'Expansion', powerMW: 300, estGPUs: 68000, co2Tons: 115000, models: ['Recommendation + video generation models'], cooling: 'Air + liquid retrofit', waterRisk: 'Low', gridRisk: 'Medium', jobs: '480 / 1400', role: 'Massive recommender and media model infrastructure.' }
+  { id: 'cn-5', name: 'ByteDance Ulanqab Hub', operator: 'CHINA', lat: 41.03, lon: 113.12, status: 'Expansion', powerMW: 300, estGPUs: 68000, co2Tons: 115000, models: ['Recommendation + video generation models'], cooling: 'Air + liquid retrofit', waterRisk: 'Low', gridRisk: 'Medium', jobs: '480 / 1400', role: 'Massive recommender and media model infrastructure.' },
+  { id: 'orbital-1', name: 'NEXUS-1 Orbital Node', operator: 'AWS', lat: 0, lon: 0, status: 'Announced', powerMW: 1200, estGPUs: 350000, co2Tons: 0, models: ['Next-Gen Frontier Models'], cooling: 'Radiative vacuum cooling', waterRisk: 'None', gridRisk: 'None', jobs: '50 remote / 200 ground', role: 'Space-based compute escaping Earth\'s power/climate constraints.' }
 ];
 
 const CENTER_ONLINE_YEAR = {
@@ -267,7 +268,8 @@ const CENTER_ONLINE_YEAR = {
   'cw-1': 2023, 'cw-2': 2026,
   'colo-1': 2020, 'colo-2': 2021, 'colo-3': 2026, 'colo-4': 2022,
   'nv-1': 2024, 'xai-1': 2024,
-  'cn-1': 2022, 'cn-2': 2022, 'cn-3': 2026, 'cn-4': 2023, 'cn-5': 2026
+  'cn-1': 2022, 'cn-2': 2022, 'cn-3': 2026, 'cn-4': 2023, 'cn-5': 2026,
+  'orbital-1': 2030
 };
 
 DATA_CENTERS.forEach((center) => {
