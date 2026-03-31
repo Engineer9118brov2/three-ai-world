@@ -357,9 +357,16 @@ const markerById = new Map();
 const centerSceneMeta = new Map();
 DATA_CENTERS.forEach((center) => {
   const position = latLonToVector3(center.lat, center.lon, globeRadius + 0.03);
+  const color = statusColor(center.status);
   const marker = new THREE.Mesh(
     new THREE.SphereGeometry(0.036, 10, 10),
-    new THREE.MeshBasicMaterial({ color: statusColor(center.status) })
+    new THREE.MeshStandardMaterial({ 
+      color: color,
+      emissive: color,
+      emissiveIntensity: 0.4,
+      roughness: 0.2,
+      metalness: 0.8
+    })
   );
   marker.userData = center;
   marker.position.copy(position);
@@ -722,9 +729,17 @@ function selectCenter(center, focus = true) {
   markerById.forEach((marker, id) => {
     const material = marker.material;
     if (!material || Array.isArray(material)) return;
-    material.color.setHex(statusColor(marker.userData.status));
+    const baseColor = new THREE.Color(statusColor(marker.userData.status));
+    material.color.copy(baseColor);
+    material.emissive.copy(baseColor);
     marker.scale.setScalar(id === center.id ? 1.65 : 1);
-    if (id === center.id) material.color.setHex(0x94ffd9);
+    if (id === center.id) {
+      material.color.setHex(0x94ffd9);
+      material.emissive.setHex(0x94ffd9);
+      material.emissiveIntensity = 0.8;
+    } else {
+      material.emissiveIntensity = 0.4;
+    }
   });
 
   if (focus) {
