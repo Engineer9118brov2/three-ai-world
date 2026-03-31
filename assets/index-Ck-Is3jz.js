@@ -3727,6 +3727,7 @@ void main() {
       <br><br><b>Global Warming:</b> As AI capex explodes, the demand for power is often met by fossil fuels when grids are stressed, complicating global net-zero goals.
     `},bubble:{title:"THE DEBT BUBBLE",content:`
       <b>The Thesis:</b> Mark Tilbury and other analysts warn of an "AI Debt Bubble." Companies are borrowing billions to buy GPUs (Capex) before they have proven AI can generate matching profits (ROI).
+      <br><br><b>The Tilbury Trigger:</b> The primary risk is an <b>Interest Rate Shock</b>. If rates stay high or rise, the cost of servicing massive GPU-linked debt becomes unsustainable for operators with thin margins.
       <br><br><b>The Risk:</b> If AI adoption slows, companies may be stuck with massive debt and underutilized hardware, leading to a market crash similar to the Dot-com bubble.
     `},warming:{title:"AI & GLOBAL WARMING",content:`
       <b>The Paradox:</b> While AI can help optimize energy grids and discover new materials for solar cells, its own infrastructure is a major carbon driver.
