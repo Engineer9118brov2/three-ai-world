@@ -509,15 +509,16 @@ function simulateOperator(operator, params) {
   const coverage = operatingProfit / Math.max(interestCost, 0.1);
   const capexRatio = base.capexB / Math.max(revenue, 0.1);
 
+  // Mark Tilbury's focus: Negative FCF and high debt coverage risk
   const score = Math.max(
     0,
     Math.min(
       100,
-      debtToOp * 10 +
-        Math.max(0, 3 - coverage) * 14 +
-        Math.max(0, capexRatio - 0.25) * 120 +
-        Math.max(0, -freeCash / 8) * 10 +
-        Math.max(0, 0.75 - utilFactor) * 50
+      debtToOp * 8 +
+        Math.max(0, 3 - coverage) * 15 +
+        Math.max(0, capexRatio - 0.2) * 100 +
+        Math.max(0, -freeCash / 5) * 25 +
+        Math.max(0, 0.8 - utilFactor) * 40
     )
   );
 
