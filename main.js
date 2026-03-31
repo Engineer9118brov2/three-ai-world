@@ -785,6 +785,14 @@ const AI_KNOWLEDGE = {
       <b>The Thesis:</b> Mark Tilbury and other analysts warn of an "AI Debt Bubble." Companies are borrowing billions to buy GPUs (Capex) before they have proven AI can generate matching profits (ROI).
       <br><br><b>The Risk:</b> If AI adoption slows, companies may be stuck with massive debt and underutilized hardware, leading to a market crash similar to the Dot-com bubble.
     `
+  },
+  warming: {
+    title: 'AI & GLOBAL WARMING',
+    content: `
+      <b>The Paradox:</b> While AI can help optimize energy grids and discover new materials for solar cells, its own infrastructure is a major carbon driver.
+      <br><br><b>Grid Strain:</b> In regions like Ireland and Northern Virginia, data centers now consume over 20% of total electricity, often forcing utilities to keep fossil fuel plants online longer than planned.
+      <br><br><b>Net Zero Risk:</b> Hyperscalers (Google, Microsoft) have reported carbon footprint increases of 30-50% since the Gen-AI boom began, threatening their 2030 climate commitments.
+    `
   }
 };
 
@@ -807,7 +815,8 @@ window.showInfoMode = function(mode) {
       <div style="display:flex;flex-direction:column;gap:8px;">
         <button onclick="renderKbArticle('basics')" style="padding:6px;font-size:9px;text-align:left;">1. AI BASICS</button>
         <button onclick="renderKbArticle('climate')" style="padding:6px;font-size:9px;text-align:left;">2. CLIMATE IMPACT</button>
-        <button onclick="renderKbArticle('bubble')" style="padding:6px;font-size:9px;text-align:left;">3. DEBT BUBBLE</button>
+        <button onclick="renderKbArticle('warming')" style="padding:6px;font-size:9px;text-align:left;">3. GLOBAL WARMING</button>
+        <button onclick="renderKbArticle('bubble')" style="padding:6px;font-size:9px;text-align:left;">4. DEBT BUBBLE</button>
       </div>
       <div id="kb-article" style="margin-top:12px;font-size:10px;line-height:1.4;border-top:1px solid #333;padding-top:10px;">
         Select a topic above to learn more about AI history and risks.
