@@ -711,7 +711,10 @@ function selectCenter(center, focus = true) {
   const siteHtml = simplifiedMode ? renderSimplifiedInfoHtml(center) : centerDetailsHtml(center);
   const infoContentEl = document.getElementById('info-content');
   if (infoContentEl && currentInfoMode === 'site') {
+    infoContentEl.classList.remove('content-update');
+    void infoContentEl.offsetWidth; // Trigger reflow
     infoContentEl.innerHTML = siteHtml;
+    infoContentEl.classList.add('content-update');
   }
   // Store the site HTML so we can switch back to it
   lastSiteHtml = siteHtml;
@@ -773,6 +776,9 @@ window.showInfoMode = function(mode) {
   const btnSite = document.getElementById('btn-info-site');
   const btnKb = document.getElementById('btn-info-kb');
 
+  contentEl.classList.remove('content-update');
+  void contentEl.offsetWidth; // Trigger reflow
+
   if (mode === 'site') {
     contentEl.innerHTML = lastSiteHtml;
     btnSite.style.opacity = '1';
@@ -792,13 +798,17 @@ window.showInfoMode = function(mode) {
     btnSite.style.opacity = '0.5';
     btnKb.style.opacity = '1';
   }
+  contentEl.classList.add('content-update');
 };
 
 window.renderKbArticle = function(key) {
   const article = AI_KNOWLEDGE[key];
   const artEl = document.getElementById('kb-article');
   if (artEl) {
+    artEl.classList.remove('content-update');
+    void artEl.offsetWidth;
     artEl.innerHTML = `<b>${article.title}</b><br><br>${article.content}`;
+    artEl.classList.add('content-update');
   }
 };
 
