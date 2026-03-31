@@ -142,19 +142,22 @@
 
         /* ── MOBILE ──────────────────────────────────────────────────────────── */
         @media (max-width: 900px) {
-            #header { top: 14px; left: 14px; padding-left: 10px; }
-            #top-center { top: 72px; left: 14px; transform: none; right: 14px; align-items: flex-start; }
-            #stats-panel { width: 100%; justify-content: space-between; }
+            #header { top: 14px; left: 14px; padding-left: 10px; border-left-width: 2px; }
+            #top-center { top: 64px; left: 10px; transform: none; right: 10px; align-items: stretch; gap: 4px; }
+            #stats-panel { padding: 8px; font-size: 9px; flex-wrap: wrap; justify-content: space-around; }
+            #ctrl-btns { gap: 4px; }
+            #ctrl-btns button { padding: 6px 8px; flex: 1; min-width: 80px; }
             #catalog-panel { display: none; }
-            #timeline-panel { bottom: 14px; left: 14px; right: 14px; width: auto; transform: none; grid-template-columns: 1fr; }
-            #timeline-right { grid-column: 1; }
+            #timeline-panel { bottom: 10px; left: 10px; right: 10px; width: auto; transform: none; grid-template-columns: 1fr; padding: 10px; }
+            #timeline-right { display: none; }
             #bubble-panel { display: none; }
-            #info-panel { top: auto; bottom: 200px; right: 14px; left: 14px; width: auto; padding: 12px; font-size: 10px; max-height: 22vh; }
+            #info-panel { top: auto; bottom: 180px; right: 10px; left: 10px; width: auto; padding: 12px; font-size: 10px; max-height: 25vh; }
             #hint { display: none; }
-            h1 { font-size: 14px; }
-            #story-card { padding: 24px 20px; }
-            #story-year { font-size: 38px; }
+            h1 { font-size: 13px; }
+            #story-card { padding: 20px; }
+            #story-year { font-size: 32px; }
             #story-headline { font-size: 14px; }
+            #info-nav button { font-size: 10px; padding: 6px 10px; }
         }
     </style>
   <script type="module" crossorigin src="/three-ai-world/assets/index-B21koRvb.js"></script>
