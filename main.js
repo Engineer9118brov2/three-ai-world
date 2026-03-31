@@ -294,10 +294,47 @@ const HQS = {
 
 const markers = new THREE.Group();
 const markerHitTargets = new THREE.Group();
+const historyMarkers = new THREE.Group();
+const historyHitTargets = new THREE.Group();
 const arcs = new THREE.Group();
 const loopGroup = new THREE.Group();
 const chinaFlowGroup = new THREE.Group();
-globeGroup.add(markers, markerHitTargets, arcs, loopGroup, chinaFlowGroup);
+globeGroup.add(markers, markerHitTargets, historyMarkers, historyHitTargets, arcs, loopGroup, chinaFlowGroup);
+historyMarkers.visible = false;
+
+const AI_BREAKTHROUGHS = [
+  { year: 1956, name: 'Dartmouth Workshop', loc: 'Hanover, NH', lat: 43.7, lon: -72.2, desc: 'The birth of "Artificial Intelligence" as a field of study.' },
+  { year: 1997, name: 'Deep Blue vs Kasparov', loc: 'New York, NY', lat: 40.7, lon: -74.0, desc: 'IBM\'s Deep Blue becomes the first computer to beat a reigning world chess champion.' },
+  { year: 2012, name: 'AlexNet Breakthrough', loc: 'Toronto, Canada', lat: 43.6, lon: -79.3, desc: 'Deep learning revolution: A neural network shatters image recognition records.' },
+  { year: 2016, name: 'AlphaGo Victory', loc: 'Seoul, South Korea', lat: 37.5, lon: 126.9, desc: 'Google DeepMind\'s AlphaGo beats Lee Sedol, a milestone in intuitive AI.' },
+  { year: 2017, name: 'Transformer Architecture', loc: 'Mountain View, CA', lat: 37.4, lon: -122.0, desc: 'Google researchers publish "Attention Is All You Need", the foundation for GPT.' }
+];
+
+AI_BREAKTHROUGHS.forEach((bt) => {
+  const position = latLonToVector3(bt.lat, bt.lon, globeRadius + 0.04);
+  const marker = new THREE.Mesh(
+    new THREE.OctahedronGeometry(0.045, 0),
+    new THREE.MeshBasicMaterial({ color: 0xffd700 }) // Gold for breakthroughs
+  );
+  marker.userData = { ...bt, isBreakthrough: true };
+  marker.position.copy(position);
+  historyMarkers.add(marker);
+
+  const hitTarget = new THREE.Mesh(
+    new THREE.SphereGeometry(0.12, 12, 12),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 })
+  );
+  hitTarget.userData = marker.userData;
+  hitTarget.position.copy(position);
+  historyHitTargets.add(hitTarget);
+});
+
+window.toggleHistoryMode = () => {
+  historyMarkers.visible = !historyMarkers.visible;
+  historyHitTargets.visible = historyMarkers.visible;
+  const btn = document.getElementById('btn-history');
+  if (btn) btn.innerText = historyMarkers.visible ? 'HIDE BREAKTHROUGHS' : 'AI BREAKTHROUGHS';
+};
 
 function createArc(start, end, color = 0x79ffd0, opacity = 0.18, height = 2.8) {
   const startVec = latLonToVector3(start.lat, start.lon, globeRadius + 0.03);
@@ -873,6 +910,16 @@ bubbleResetBtn.addEventListener('click', () => {
   updateBubbleLab();
 });
 
+function renderBreakthroughHtml(bt) {
+  return `
+    <div style="font-size:13px;color:#ffd700;margin-bottom:10px;">HISTORICAL BREAKTHROUGH: ${bt.year}</div>
+    <div style="margin-bottom:8px;"><b>Name:</b> ${bt.name}</div>
+    <div style="margin-bottom:8px;"><b>Location:</b> ${bt.loc}</div>
+    <div style="margin-bottom:8px;line-height:1.5;"><b>Impact:</b> ${bt.desc}</div>
+    <div style="margin-top:12px;opacity:0.6;font-size:9px;">THIS SITE REPRESENTS A PIVOTAL MOMENT IN THE EVOLUTION OF ARTIFICIAL INTELLIGENCE.</div>
+  `;
+}
+
 window.addEventListener('click', (event) => {
   if (performance.now() < suppressClickUntil) return;
   if (draggedSincePointerDown) return;
@@ -885,6 +932,20 @@ window.addEventListener('click', (event) => {
   pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
   pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
+
+  // Check history targets first if visible
+  if (historyMarkers.visible) {
+    const historyHits = raycaster.intersectObjects(historyHitTargets.children);
+    if (historyHits.length > 0) {
+      const bt = historyHits[0].object.userData;
+      lastSiteHtml = renderBreakthroughHtml(bt);
+      if (currentInfoMode === 'site') {
+        document.getElementById('info-content').innerHTML = lastSiteHtml;
+      }
+      focusPoint = latLonToVector3(bt.lat, bt.lon, globeRadius + 0.04);
+      return;
+    }
+  }
 
   const visibleHitTargets = markerHitTargets.children.filter((obj) => obj.visible);
   const hits = raycaster.intersectObjects(visibleHitTargets);
@@ -1022,6 +1083,8 @@ function renderSimplifiedInfoHtml(center) {
     `<div style="margin-bottom:6px;"><b>Company:</b> ${center.operator}</div>`,
     `<div style="margin-bottom:6px;"><b>Status:</b> ${simplifiedStatusLabel(center.status)}</div>`,
     `<div style="margin-bottom:6px;"><b>Energy use:</b> ${center.powerMW} megawatts — enough to power ~${Math.round(center.powerMW * 750).toLocaleString()} homes</div>`,
+    `<div style="margin-bottom:6px;"><b>GPU Capacity:</b> ~${center.estGPUs.toLocaleString()} processors</div>`,
+    `<div style="margin-bottom:6px;"><b>Carbon Impact:</b> <span style="color:#ff8787;">${center.co2Tons.toLocaleString()} tons of CO2 per year</span></div>`,
     `<div style="margin-bottom:6px;"><b>What it does:</b> ${center.role}</div>`,
     `<div style="margin-bottom:6px;"><b>AI models hosted here:</b> ${center.models.join(', ')}</div>`,
     `<div style="margin-bottom:6px;"><b>Cooling method:</b> ${center.cooling}</div>`,
