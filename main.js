@@ -205,101 +205,56 @@ const BUBBLE_OPERATORS = {
   CHINA: { debtB: 210, capexB: 78, revenueB: 95, ebitdaMargin: 0.2, baseRate: 5.0, aiShare: 0.34 }
 };
 
-const TIMELINE = [
-  { year: 2019, phase: 'PRE-BOOM', desc: 'AI spend is meaningful but still niche. Capex and debt loads are manageable; utilization is variable.' },
-  { year: 2020, phase: 'DIGITAL ACCELERATION', desc: 'Pandemic demand accelerates cloud migration. GPU demand starts outpacing supply in key regions.' },
-  { year: 2021, phase: 'SCALE-UP', desc: 'Large model training budgets rise sharply; infrastructure commitments lock in multiyear power contracts.' },
-  { year: 2022, phase: 'GEN-AI INFLECTION', desc: 'Public launch moment. Capital markets reward growth; debt-backed expansion becomes easier to justify.' },
-  { year: 2023, phase: 'GPU SCRAMBLE', desc: 'Datacenter retrofits, colocation GPU deals, and leasing premiums spike. Execution risk rises.' },
-  { year: 2024, phase: 'HYPERSCALE CAPEX CYCLE', desc: 'Massive AI capex wave. Narrative shifts from capability race to monetization pressure.' },
-  { year: 2025, phase: 'MONETIZATION TEST', desc: 'Revenue per token and enterprise conversion rates become key. Weak utilization starts hurting margins.' },
-  { year: 2026, phase: 'DEBT REPRICING WINDOW', desc: 'Refinancing and power-cost sensitivity matter more. Operators with low coverage ratios face stress.' },
-  { year: 2027, phase: 'CONSOLIDATION RISK', desc: 'If demand growth slows, overbuilt clusters and idle accelerators can force write-downs.' },
-  { year: 2028, phase: 'EFFICIENCY WARS', desc: 'Model compression and inference efficiency reduce spend per output; weaker facilities struggle to stay full.' },
-  { year: 2029, phase: 'RESET OR RE-ACCELERATION', desc: 'Market bifurcates: high-utilization operators compound, over-levered players cut capex aggressively.' },
-  { year: 2030, phase: 'NEW BASELINE', desc: 'AI infrastructure matures into utility-like economics for winners; debt discipline decides survivorship.' }
-];
-
-const TIMELINE_METRICS = [
-  { year: 2019, capex: 18, debt: 22, bubble: 16, util: 74, powerInflation: 2, growth: 9, rateShock: 0.1 },
-  { year: 2020, capex: 23, debt: 27, bubble: 20, util: 77, powerInflation: 4, growth: 14, rateShock: 0.2 },
-  { year: 2021, capex: 31, debt: 34, bubble: 27, util: 81, powerInflation: 7, growth: 18, rateShock: 0.4 },
-  { year: 2022, capex: 43, debt: 48, bubble: 39, util: 86, powerInflation: 10, growth: 28, rateShock: 0.8 },
-  { year: 2023, capex: 57, debt: 64, bubble: 53, util: 88, powerInflation: 16, growth: 31, rateShock: 1.2 },
-  { year: 2024, capex: 71, debt: 79, bubble: 62, util: 85, powerInflation: 18, growth: 24, rateShock: 1.5 },
-  { year: 2025, capex: 83, debt: 94, bubble: 67, util: 79, powerInflation: 22, growth: 17, rateShock: 2.0 },
-  { year: 2026, capex: 88, debt: 107, bubble: 73, util: 73, powerInflation: 27, growth: 10, rateShock: 2.6 },
-  { year: 2027, capex: 82, debt: 112, bubble: 78, util: 68, powerInflation: 33, growth: 6, rateShock: 3.1 },
-  { year: 2028, capex: 74, debt: 110, bubble: 70, util: 71, powerInflation: 25, growth: 9, rateShock: 2.4 },
-  { year: 2029, capex: 69, debt: 104, bubble: 64, util: 75, powerInflation: 19, growth: 12, rateShock: 1.8 },
-  { year: 2030, capex: 66, debt: 98, bubble: 58, util: 78, powerInflation: 14, growth: 14, rateShock: 1.2 }
-];
-
-const TIMELINE_DEEP_DIVE = {
-  2019: { driver: 'EARLY FOUNDATION MODEL EXPERIMENTS', debt: 'BALANCE SHEETS STILL FLEXIBLE', trigger: 'GPU PRICES OUTPACE CUSTOMER VALUE', response: 'KEEP SPEND DISCIPLINED' },
-  2020: { driver: 'PANDEMIC DIGITAL DEMAND SHOCK', debt: 'CHEAP CREDIT SUPPORTS CAPEX', trigger: 'DEMAND NORMALIZATION', response: 'LOCK LONG-TERM CONTRACTS CAUTIOUSLY' },
-  2021: { driver: 'MULTI-CLOUD ENTERPRISE UPTAKE', debt: 'DEBT BUILDING BUT COVERED', trigger: 'CLOUD PRICE COMPRESSION', response: 'PRIORITIZE HIGH-MARGIN USE CASES' },
-  2022: { driver: 'GEN-AI PRODUCT BREAKOUT', debt: 'CAPEX COMMITMENTS ACCELERATE', trigger: "USAGE DOESN'T CONVERT TO REVENUE", response: 'TIGHTEN UNIT ECONOMICS' },
-  2023: { driver: 'GPU SUPPLY SCRAMBLE', debt: 'LEASE + FINANCING STACK EXPANDS', trigger: 'IDLE CAPACITY POST-BUYING WAVE', response: 'SHIFT TO FLEXIBLE CAPACITY' },
-  2024: { driver: 'HYPERSCALE ARMS RACE', debt: 'LARGE MATURITY WALL FORMING', trigger: 'RATE STAYS HIGHER FOR LONGER', response: 'DE-LAYER CAPEX PRIORITIES' },
-  2025: { driver: 'ROI PRESSURE FROM INVESTORS', debt: 'INTEREST COVERAGE STARTS FRAGILE FOR SOME', trigger: 'TOKEN PRICING DETERIORATION', response: 'FOCUS ON PROFITABLE VERTICALS' },
-  2026: { driver: 'REFINANCING WINDOW OPENS', debt: 'ROLLING DEBT COSTS STEP UP', trigger: 'UTILIZATION < 70%', response: 'CAPEX CUTS + CONSOLIDATION' },
-  2027: { driver: 'EFFICIENCY MODELS REDUCE DEMAND PER TOKEN', debt: 'LEGACY ASSETS RISK STRANDING', trigger: 'WRITE-DOWNS ON OLD CLUSTERS', response: 'RETIRE LOW-EFFICIENCY FLEETS' },
-  2028: { driver: 'PLATFORM CONSOLIDATION', debt: 'SURVIVORS IMPROVE COVERAGE', trigger: 'POWER SUPPLY SHOCK', response: 'GEOGRAPHIC LOAD BALANCING' },
-  2029: { driver: 'MARKET REPRICING', debt: 'DEBT METRICS STABILIZE FOR WINNERS', trigger: 'SECOND DEMAND SLOWDOWN', response: 'ASSET-LIGHT EXPANSION' },
-  2030: { driver: 'UTILITY-LIKE AI INFRA MODEL', debt: 'DISCIPLINED CAPITAL RETURNS', trigger: 'POLICY/GRID CONSTRAINTS', response: 'LONG-HORIZON CAPACITY PLANNING' }
-};
-
 const DATA_CENTERS = [
-  { id: 'aws-1', name: 'AWS US-East (N. Virginia)', operator: 'AWS', lat: 38.95, lon: -77.45, status: 'Operational', powerMW: 620, models: ['Claude', 'Llama', 'Mistral', 'Titan'], cooling: 'Air + liquid retrofit', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '1100 direct / 3600 indirect', role: 'Primary east-coast AI inference + training region.' },
-  { id: 'aws-2', name: 'AWS US-West (Oregon)', operator: 'AWS', lat: 45.6, lon: -121.18, status: 'Operational', powerMW: 480, models: ['Claude', 'Llama', 'Titan', 'Stable Diffusion'], cooling: 'Evaporative + liquid loops', waterRisk: 'Medium', gridRisk: 'Low', jobs: '850 / 2500', role: 'West-coast low-latency model serving and batch training.' },
-  { id: 'aws-3', name: 'AWS EU (Dublin)', operator: 'AWS', lat: 53.34, lon: -6.26, status: 'Operational', powerMW: 420, models: ['Llama', 'Mistral', 'Claude'], cooling: 'Air-side economization', waterRisk: 'Low', gridRisk: 'Medium', jobs: '720 / 1900', role: 'EU sovereignty-aligned AI workloads.' },
-  { id: 'aws-4', name: 'AWS AP (Singapore)', operator: 'AWS', lat: 1.35, lon: 103.82, status: 'Operational', powerMW: 360, models: ['Llama', 'Titan', 'Claude'], cooling: 'High-efficiency chilled water', waterRisk: 'High', gridRisk: 'Medium', jobs: '560 / 1400', role: 'ASEAN low-latency inference fabric.' },
-  { id: 'aws-5', name: 'AWS AP (Tokyo)', operator: 'AWS', lat: 35.68, lon: 139.76, status: 'Operational', powerMW: 330, models: ['Llama', 'Mistral', 'Titan'], cooling: 'Liquid-assist racks', waterRisk: 'Medium', gridRisk: 'Low', jobs: '520 / 1300', role: 'Japan enterprise AI serving and DR.' },
-  { id: 'aws-6', name: 'AWS AP (Sydney)', operator: 'AWS', lat: -33.86, lon: 151.2, status: 'Expansion', powerMW: 250, models: ['Llama', 'Claude', 'Titan'], cooling: 'Hybrid free cooling', waterRisk: 'Medium', gridRisk: 'Low', jobs: '430 / 1200', role: 'Oceania model hosting and compliance workloads.' },
+  { id: 'aws-1', name: 'AWS US-East (N. Virginia)', operator: 'AWS', lat: 38.95, lon: -77.45, status: 'Operational', powerMW: 620, estGPUs: 142000, co2Tons: 215000, models: ['Claude', 'Llama', 'Mistral', 'Titan'], cooling: 'Air + liquid retrofit', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '1100 direct / 3600 indirect', role: 'Primary east-coast AI inference + training region.' },
+  { id: 'aws-2', name: 'AWS US-West (Oregon)', operator: 'AWS', lat: 45.6, lon: -121.18, status: 'Operational', powerMW: 480, estGPUs: 109000, co2Tons: 62000, models: ['Claude', 'Llama', 'Titan', 'Stable Diffusion'], cooling: 'Evaporative + liquid loops', waterRisk: 'Medium', gridRisk: 'Low', jobs: '850 / 2500', role: 'West-coast low-latency model serving and batch training.' },
+  { id: 'aws-3', name: 'AWS EU (Dublin)', operator: 'AWS', lat: 53.34, lon: -6.26, status: 'Operational', powerMW: 420, estGPUs: 96000, co2Tons: 112000, models: ['Llama', 'Mistral', 'Claude'], cooling: 'Air-side economization', waterRisk: 'Low', gridRisk: 'Medium', jobs: '720 / 1900', role: 'EU sovereignty-aligned AI workloads.' },
+  { id: 'aws-4', name: 'AWS AP (Singapore)', operator: 'AWS', lat: 1.35, lon: 103.82, status: 'Operational', powerMW: 360, estGPUs: 82000, co2Tons: 148000, models: ['Llama', 'Titan', 'Claude'], cooling: 'High-efficiency chilled water', waterRisk: 'High', gridRisk: 'Medium', jobs: '560 / 1400', role: 'ASEAN low-latency inference fabric.' },
+  { id: 'aws-5', name: 'AWS AP (Tokyo)', operator: 'AWS', lat: 35.68, lon: 139.76, status: 'Operational', powerMW: 330, estGPUs: 75000, co2Tons: 122000, models: ['Llama', 'Mistral', 'Titan'], cooling: 'Liquid-assist racks', waterRisk: 'Medium', gridRisk: 'Low', jobs: '520 / 1300', role: 'Japan enterprise AI serving and DR.' },
+  { id: 'aws-6', name: 'AWS AP (Sydney)', operator: 'AWS', lat: -33.86, lon: 151.2, status: 'Expansion', powerMW: 250, estGPUs: 57000, co2Tons: 105000, models: ['Llama', 'Claude', 'Titan'], cooling: 'Hybrid free cooling', waterRisk: 'Medium', gridRisk: 'Low', jobs: '430 / 1200', role: 'Oceania model hosting and compliance workloads.' },
 
-  { id: 'az-1', name: 'Azure East US (Virginia)', operator: 'AZURE', lat: 38.9, lon: -77.2, status: 'Operational', powerMW: 680, models: ['GPT family', 'Phi', 'Llama', 'Mistral'], cooling: 'Direct-to-chip rollout', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '1300 / 3900', role: 'Large OpenAI-aligned serving and enterprise Copilot backend.' },
-  { id: 'az-2', name: 'Azure West Europe (Netherlands)', operator: 'AZURE', lat: 52.37, lon: 4.9, status: 'Operational', powerMW: 510, models: ['GPT family', 'Phi', 'Llama'], cooling: 'Air + rear-door heat exchangers', waterRisk: 'Low', gridRisk: 'Low', jobs: '900 / 2600', role: 'EU regulated AI workloads and model APIs.' },
-  { id: 'az-3', name: 'Azure Sweden Central', operator: 'AZURE', lat: 60.67, lon: 17.14, status: 'Operational', powerMW: 340, models: ['GPT family', 'Phi', 'Llama'], cooling: 'Low-ambient free cooling', waterRisk: 'Low', gridRisk: 'Low', jobs: '580 / 1700', role: 'Low-carbon training cluster placement.' },
-  { id: 'az-4', name: 'Azure Japan East', operator: 'AZURE', lat: 35.68, lon: 139.65, status: 'Operational', powerMW: 300, models: ['GPT family', 'Phi'], cooling: 'Liquid-assist', waterRisk: 'Medium', gridRisk: 'Low', jobs: '490 / 1350', role: 'Japanese language model deployment hub.' },
-  { id: 'az-5', name: 'Azure Australia East', operator: 'AZURE', lat: -33.87, lon: 151.2, status: 'Expansion', powerMW: 270, models: ['GPT family', 'Llama', 'Phi'], cooling: 'Hybrid mechanical + economizer', waterRisk: 'Medium', gridRisk: 'Low', jobs: '430 / 1180', role: 'Regional sovereign hosting.' },
-  { id: 'az-6', name: 'Azure Qatar Central', operator: 'AZURE', lat: 25.29, lon: 51.53, status: 'Announced', powerMW: 180, models: ['GPT family', 'Phi'], cooling: 'High-density liquid planned', waterRisk: 'High', gridRisk: 'Medium', jobs: '290 / 900', role: 'MENA low-latency inference entrypoint.' },
+  { id: 'az-1', name: 'Azure East US (Virginia)', operator: 'AZURE', lat: 38.9, lon: -77.2, status: 'Operational', powerMW: 680, estGPUs: 155000, co2Tons: 235000, models: ['GPT family', 'Phi', 'Llama', 'Mistral'], cooling: 'Direct-to-chip rollout', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '1300 / 3900', role: 'Large OpenAI-aligned serving and enterprise Copilot backend.' },
+  { id: 'az-2', name: 'Azure West Europe (Netherlands)', operator: 'AZURE', lat: 52.37, lon: 4.9, status: 'Operational', powerMW: 510, estGPUs: 116000, co2Tons: 82000, models: ['GPT family', 'Phi', 'Llama'], cooling: 'Air + rear-door heat exchangers', waterRisk: 'Low', gridRisk: 'Low', jobs: '900 / 2600', role: 'EU regulated AI workloads and model APIs.' },
+  { id: 'az-3', name: 'Azure Sweden Central', operator: 'AZURE', lat: 60.67, lon: 17.14, status: 'Operational', powerMW: 340, estGPUs: 77000, co2Tons: 5000, models: ['GPT family', 'Phi', 'Llama'], cooling: 'Low-ambient free cooling', waterRisk: 'Low', gridRisk: 'Low', jobs: '580 / 1700', role: 'Low-carbon training cluster placement.' },
+  { id: 'az-4', name: 'Azure Japan East', operator: 'AZURE', lat: 35.68, lon: 139.65, status: 'Operational', powerMW: 300, estGPUs: 68000, co2Tons: 110000, models: ['GPT family', 'Phi'], cooling: 'Liquid-assist', waterRisk: 'Medium', gridRisk: 'Low', jobs: '490 / 1350', role: 'Japanese language model deployment hub.' },
+  { id: 'az-5', name: 'Azure Australia East', operator: 'AZURE', lat: -33.87, lon: 151.2, status: 'Expansion', powerMW: 270, estGPUs: 61000, co2Tons: 115000, models: ['GPT family', 'Llama', 'Phi'], cooling: 'Hybrid mechanical + economizer', waterRisk: 'Medium', gridRisk: 'Low', jobs: '430 / 1180', role: 'Regional sovereign hosting.' },
+  { id: 'az-6', name: 'Azure Qatar Central', operator: 'AZURE', lat: 25.29, lon: 51.53, status: 'Announced', powerMW: 180, estGPUs: 41000, co2Tons: 85000, models: ['GPT family', 'Phi'], cooling: 'High-density liquid planned', waterRisk: 'High', gridRisk: 'Medium', jobs: '290 / 900', role: 'MENA low-latency inference entrypoint.' },
 
-  { id: 'gcp-1', name: 'Google Council Bluffs (Iowa)', operator: 'GOOGLE', lat: 41.26, lon: -95.86, status: 'Operational', powerMW: 590, models: ['Gemini', 'Imagen', 'Llama'], cooling: 'Liquid + evaporative', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '960 / 3000', role: 'Core Gemini training and TPU orchestration region.' },
-  { id: 'gcp-2', name: 'Google The Dalles (Oregon)', operator: 'GOOGLE', lat: 45.59, lon: -121.18, status: 'Operational', powerMW: 470, models: ['Gemini', 'Imagen', 'Codey'], cooling: 'River/air-assisted cooling', waterRisk: 'Medium', gridRisk: 'Low', jobs: '820 / 2400', role: 'West inference + multimodal serving.' },
-  { id: 'gcp-3', name: 'Google Hamina (Finland)', operator: 'GOOGLE', lat: 60.57, lon: 27.2, status: 'Operational', powerMW: 310, models: ['Gemini', 'Gemma'], cooling: 'Seawater cooling', waterRisk: 'Low', gridRisk: 'Low', jobs: '500 / 1450', role: 'Low-carbon EU model capacity.' },
-  { id: 'gcp-4', name: 'Google St. Ghislain (Belgium)', operator: 'GOOGLE', lat: 50.45, lon: 3.82, status: 'Operational', powerMW: 320, models: ['Gemini', 'Gemma', 'Imagen'], cooling: 'Economizer + liquid assist', waterRisk: 'Low', gridRisk: 'Low', jobs: '520 / 1500', role: 'EU enterprise API footprint.' },
-  { id: 'gcp-5', name: 'Google Singapore', operator: 'GOOGLE', lat: 1.35, lon: 103.82, status: 'Operational', powerMW: 290, models: ['Gemini', 'Gemma'], cooling: 'Chilled water optimized', waterRisk: 'High', gridRisk: 'Medium', jobs: '470 / 1300', role: 'Southeast Asia model access node.' },
-  { id: 'gcp-6', name: 'Google Milan Region', operator: 'GOOGLE', lat: 45.46, lon: 9.19, status: 'Announced', powerMW: 200, models: ['Gemini', 'Gemma'], cooling: 'Planned high-density liquid', waterRisk: 'Medium', gridRisk: 'Low', jobs: '320 / 980', role: 'Southern Europe sovereignty coverage.' },
+  { id: 'gcp-1', name: 'Google Council Bluffs (Iowa)', operator: 'GOOGLE', lat: 41.26, lon: -95.86, status: 'Operational', powerMW: 590, estGPUs: 135000, co2Tons: 210000, models: ['Gemini', 'Imagen', 'Llama'], cooling: 'Liquid + evaporative', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '960 / 3000', role: 'Core Gemini training and TPU orchestration region.' },
+  { id: 'gcp-2', name: 'Google The Dalles (Oregon)', operator: 'GOOGLE', lat: 45.59, lon: -121.18, status: 'Operational', powerMW: 470, estGPUs: 107000, co2Tons: 60000, models: ['Gemini', 'Imagen', 'Codey'], cooling: 'River/air-assisted cooling', waterRisk: 'Medium', gridRisk: 'Low', jobs: '820 / 2400', role: 'West inference + multimodal serving.' },
+  { id: 'gcp-3', name: 'Google Hamina (Finland)', operator: 'GOOGLE', lat: 60.57, lon: 27.2, status: 'Operational', powerMW: 310, estGPUs: 70000, co2Tons: 8000, models: ['Gemini', 'Gemma'], cooling: 'Seawater cooling', waterRisk: 'Low', gridRisk: 'Low', jobs: '500 / 1450', role: 'Low-carbon EU model capacity.' },
+  { id: 'gcp-4', name: 'Google St. Ghislain (Belgium)', operator: 'GOOGLE', lat: 50.45, lon: 3.82, status: 'Operational', powerMW: 320, estGPUs: 73000, co2Tons: 45000, models: ['Gemini', 'Gemma', 'Imagen'], cooling: 'Economizer + liquid assist', waterRisk: 'Low', gridRisk: 'Low', jobs: '520 / 1500', role: 'EU enterprise API footprint.' },
+  { id: 'gcp-5', name: 'Google Singapore', operator: 'GOOGLE', lat: 1.35, lon: 103.82, status: 'Operational', powerMW: 290, estGPUs: 66000, co2Tons: 120000, models: ['Gemini', 'Gemma'], cooling: 'Chilled water optimized', waterRisk: 'High', gridRisk: 'Medium', jobs: '470 / 1300', role: 'Southeast Asia model access node.' },
+  { id: 'gcp-6', name: 'Google Milan Region', operator: 'GOOGLE', lat: 45.46, lon: 9.19, status: 'Announced', powerMW: 200, estGPUs: 45000, co2Tons: 55000, models: ['Gemini', 'Gemma'], cooling: 'Planned high-density liquid', waterRisk: 'Medium', gridRisk: 'Low', jobs: '320 / 980', role: 'Southern Europe sovereignty coverage.' },
 
-  { id: 'meta-1', name: 'Meta Altoona (Iowa)', operator: 'META', lat: 41.65, lon: -93.48, status: 'Operational', powerMW: 430, models: ['Llama family', 'Multimodal assistants'], cooling: 'Air + liquid pilots', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '710 / 2200', role: 'Large social graph + model serving backend.' },
-  { id: 'meta-2', name: 'Meta New Albany (Ohio)', operator: 'META', lat: 40.08, lon: -82.81, status: 'Operational', powerMW: 520, models: ['Llama family', 'Recommender models'], cooling: 'Hybrid direct-to-chip', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '860 / 2700', role: 'US east personalized ranking and generative serving.' },
-  { id: 'meta-3', name: 'Meta Clonee (Ireland)', operator: 'META', lat: 53.41, lon: -6.47, status: 'Operational', powerMW: 300, models: ['Llama family'], cooling: 'Free-air optimized', waterRisk: 'Low', gridRisk: 'Medium', jobs: '500 / 1500', role: 'EU data residency workload split.' },
-  { id: 'meta-4', name: 'Meta Odense (Denmark)', operator: 'META', lat: 55.4, lon: 10.39, status: 'Expansion', powerMW: 350, models: ['Llama family', 'Vision encoders'], cooling: 'Heat recovery + liquid', waterRisk: 'Low', gridRisk: 'Low', jobs: '560 / 1650', role: 'Nordic low-carbon AI capacity growth.' },
+  { id: 'meta-1', name: 'Meta Altoona (Iowa)', operator: 'META', lat: 41.65, lon: -93.48, status: 'Operational', powerMW: 430, estGPUs: 98000, co2Tons: 155000, models: ['Llama family', 'Multimodal assistants'], cooling: 'Air + liquid pilots', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '710 / 2200', role: 'Large social graph + model serving backend.' },
+  { id: 'meta-2', name: 'Meta New Albany (Ohio)', operator: 'META', lat: 40.08, lon: -82.81, status: 'Operational', powerMW: 520, estGPUs: 118000, co2Tons: 195000, models: ['Llama family', 'Recommender models'], cooling: 'Hybrid direct-to-chip', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '860 / 2700', role: 'US east personalized ranking and generative serving.' },
+  { id: 'meta-3', name: 'Meta Clonee (Ireland)', operator: 'META', lat: 53.41, lon: -6.47, status: 'Operational', powerMW: 300, estGPUs: 68000, co2Tons: 80000, models: ['Llama family'], cooling: 'Free-air optimized', waterRisk: 'Low', gridRisk: 'Medium', jobs: '500 / 1500', role: 'EU data residency workload split.' },
+  { id: 'meta-4', name: 'Meta Odense (Denmark)', operator: 'META', lat: 55.4, lon: 10.39, status: 'Expansion', powerMW: 350, estGPUs: 80000, co2Tons: 12000, models: ['Llama family', 'Vision encoders'], cooling: 'Heat recovery + liquid', waterRisk: 'Low', gridRisk: 'Low', jobs: '560 / 1650', role: 'Nordic low-carbon AI capacity growth.' },
 
-  { id: 'orcl-1', name: 'Oracle Ashburn', operator: 'ORACLE', lat: 39.04, lon: -77.49, status: 'Operational', powerMW: 280, models: ['Cohere Command', 'Llama', 'OCI Generative AI'], cooling: 'Air + rear-door HX', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '420 / 1200', role: 'OCI AI enterprise workloads.' },
-  { id: 'orcl-2', name: 'Oracle Frankfurt', operator: 'ORACLE', lat: 50.11, lon: 8.68, status: 'Operational', powerMW: 220, models: ['Cohere Command', 'Llama'], cooling: 'Economizer-centric', waterRisk: 'Low', gridRisk: 'Low', jobs: '340 / 980', role: 'EU mission-critical model inference.' },
-  { id: 'orcl-3', name: 'Oracle Mumbai', operator: 'ORACLE', lat: 19.08, lon: 72.88, status: 'Expansion', powerMW: 260, models: ['Llama', 'OCI GenAI'], cooling: 'High-density liquid design', waterRisk: 'High', gridRisk: 'Medium', jobs: '390 / 1100', role: 'India growth market model serving.' },
+  { id: 'orcl-1', name: 'Oracle Ashburn', operator: 'ORACLE', lat: 39.04, lon: -77.49, status: 'Operational', powerMW: 280, estGPUs: 64000, co2Tons: 98000, models: ['Cohere Command', 'Llama', 'OCI Generative AI'], cooling: 'Air + rear-door HX', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '420 / 1200', role: 'OCI AI enterprise workloads.' },
+  { id: 'orcl-2', name: 'Oracle Frankfurt', operator: 'ORACLE', lat: 50.11, lon: 8.68, status: 'Operational', powerMW: 220, estGPUs: 50000, co2Tons: 35000, models: ['Cohere Command', 'Llama'], cooling: 'Economizer-centric', waterRisk: 'Low', gridRisk: 'Low', jobs: '340 / 980', role: 'EU mission-critical model inference.' },
+  { id: 'orcl-3', name: 'Oracle Mumbai', operator: 'ORACLE', lat: 19.08, lon: 72.88, status: 'Expansion', powerMW: 260, estGPUs: 59000, co2Tons: 110000, models: ['Llama', 'OCI GenAI'], cooling: 'High-density liquid design', waterRisk: 'High', gridRisk: 'Medium', jobs: '390 / 1100', role: 'India growth market model serving.' },
 
-  { id: 'ibm-1', name: 'IBM Dallas', operator: 'IBM', lat: 32.78, lon: -96.8, status: 'Operational', powerMW: 170, models: ['Granite', 'Watsonx'], cooling: 'Air + liquid row cooling', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '280 / 760', role: 'Watsonx model hosting and enterprise AI.' },
-  { id: 'ibm-2', name: 'IBM Frankfurt', operator: 'IBM', lat: 50.12, lon: 8.68, status: 'Operational', powerMW: 150, models: ['Granite', 'Watsonx'], cooling: 'Air-side economization', waterRisk: 'Low', gridRisk: 'Low', jobs: '250 / 700', role: 'EU regulated IBM AI workloads.' },
+  { id: 'ibm-1', name: 'IBM Dallas', operator: 'IBM', lat: 32.78, lon: -96.8, status: 'Operational', powerMW: 170, estGPUs: 38000, co2Tons: 60000, models: ['Granite', 'Watsonx'], cooling: 'Air + liquid row cooling', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '280 / 760', role: 'Watsonx model hosting and enterprise AI.' },
+  { id: 'ibm-2', name: 'IBM Frankfurt', operator: 'IBM', lat: 50.12, lon: 8.68, status: 'Operational', powerMW: 150, estGPUs: 34000, co2Tons: 25000, models: ['Granite', 'Watsonx'], cooling: 'Air-side economization', waterRisk: 'Low', gridRisk: 'Low', jobs: '250 / 700', role: 'EU regulated IBM AI workloads.' },
 
-  { id: 'cw-1', name: 'CoreWeave New Jersey', operator: 'COREWEAVE', lat: 40.73, lon: -74.17, status: 'Operational', powerMW: 210, models: ['Llama', 'Mistral', 'Stable Diffusion', 'Video models'], cooling: 'Liquid-heavy GPU clusters', waterRisk: 'Medium', gridRisk: 'High', jobs: '330 / 920', role: 'GPU-dense model training and fine-tuning.' },
-  { id: 'cw-2', name: 'CoreWeave Illinois', operator: 'COREWEAVE', lat: 41.88, lon: -87.63, status: 'Expansion', powerMW: 230, models: ['Llama', 'Mistral', 'Diffusion models'], cooling: 'Direct-to-chip planned', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '350 / 980', role: 'Midwest training + backup inference pool.' },
+  { id: 'cw-1', name: 'CoreWeave New Jersey', operator: 'COREWEAVE', lat: 40.73, lon: -74.17, status: 'Operational', powerMW: 210, estGPUs: 48000, co2Tons: 75000, models: ['Llama', 'Mistral', 'Stable Diffusion', 'Video models'], cooling: 'Liquid-heavy GPU clusters', waterRisk: 'Medium', gridRisk: 'High', jobs: '330 / 920', role: 'GPU-dense model training and fine-tuning.' },
+  { id: 'cw-2', name: 'CoreWeave Illinois', operator: 'COREWEAVE', lat: 41.88, lon: -87.63, status: 'Expansion', powerMW: 230, estGPUs: 52000, co2Tons: 82000, models: ['Llama', 'Mistral', 'Diffusion models'], cooling: 'Direct-to-chip planned', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '350 / 980', role: 'Midwest training + backup inference pool.' },
 
-  { id: 'colo-1', name: 'Digital Realty Ashburn', operator: 'COLOCATION', lat: 39.03, lon: -77.48, status: 'Operational', powerMW: 260, models: ['Hosted GPU clouds', 'Private Llama clusters'], cooling: 'Tenant-specific liquid retrofits', waterRisk: 'Medium', gridRisk: 'High', jobs: '410 / 1200', role: 'Multi-tenant AI backbone interconnection hub.' },
-  { id: 'colo-2', name: 'Digital Realty Singapore', operator: 'COLOCATION', lat: 1.29, lon: 103.85, status: 'Operational', powerMW: 190, models: ['Hosted enterprise copilots'], cooling: 'Chilled water systems', waterRisk: 'High', gridRisk: 'Medium', jobs: '300 / 860', role: 'APAC enterprise colocation AI services.' },
-  { id: 'colo-3', name: 'QTS Phoenix Metro', operator: 'COLOCATION', lat: 33.45, lon: -112.07, status: 'Expansion', powerMW: 310, models: ['Hyperscaler GPU pods', 'Private model serving'], cooling: 'Liquid retrofit in progress', waterRisk: 'High', gridRisk: 'Medium', jobs: '500 / 1500', role: 'Southwest hyperscale AI growth corridor.' },
-  { id: 'colo-4', name: 'QTS Atlanta Metro', operator: 'COLOCATION', lat: 33.75, lon: -84.39, status: 'Operational', powerMW: 220, models: ['Hybrid cloud model hosting'], cooling: 'Air-side + adiabatic', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '360 / 1020', role: 'Southeast enterprise and media AI serving.' },
+  { id: 'colo-1', name: 'Digital Realty Ashburn', operator: 'COLOCATION', lat: 39.03, lon: -77.48, status: 'Operational', powerMW: 260, estGPUs: 59000, co2Tons: 92000, models: ['Hosted GPU clouds', 'Private Llama clusters'], cooling: 'Tenant-specific liquid retrofits', waterRisk: 'Medium', gridRisk: 'High', jobs: '410 / 1200', role: 'Multi-tenant AI backbone interconnection hub.' },
+  { id: 'colo-2', name: 'Digital Realty Singapore', operator: 'COLOCATION', lat: 1.29, lon: 103.85, status: 'Operational', powerMW: 190, estGPUs: 43000, co2Tons: 78000, models: ['Hosted enterprise copilots'], cooling: 'Chilled water systems', waterRisk: 'High', gridRisk: 'Medium', jobs: '300 / 860', role: 'APAC enterprise colocation AI services.' },
+  { id: 'colo-3', name: 'QTS Phoenix Metro', operator: 'COLOCATION', lat: 33.45, lon: -112.07, status: 'Expansion', powerMW: 310, estGPUs: 70000, co2Tons: 110000, models: ['Hyperscaler GPU pods', 'Private model serving'], cooling: 'Liquid retrofit in progress', waterRisk: 'High', gridRisk: 'Medium', jobs: '500 / 1500', role: 'Southwest hyperscale AI growth corridor.' },
+  { id: 'colo-4', name: 'QTS Atlanta Metro', operator: 'COLOCATION', lat: 33.75, lon: -84.39, status: 'Operational', powerMW: 220, estGPUs: 50000, co2Tons: 78000, models: ['Hybrid cloud model hosting'], cooling: 'Air-side + adiabatic', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '360 / 1020', role: 'Southeast enterprise and media AI serving.' },
 
-  { id: 'nv-1', name: 'NVIDIA DGX Cloud Hub (Santa Clara)', operator: 'NVIDIA', lat: 37.35, lon: -121.95, status: 'Operational', powerMW: 120, models: ['NIM services', 'Llama', 'Nemotron'], cooling: 'Advanced liquid racks', waterRisk: 'Low', gridRisk: 'Medium', jobs: '210 / 560', role: 'Reference AI platform and partner enablement.' },
-  { id: 'xai-1', name: 'xAI Colossus (Memphis)', operator: 'XAI', lat: 35.15, lon: -90.05, status: 'Operational', powerMW: 260, models: ['Grok family'], cooling: 'Containerized liquid + air hybrid', waterRisk: 'Medium', gridRisk: 'High', jobs: '340 / 1000', role: 'Fast-iteration frontier model training site.' },
+  { id: 'nv-1', name: 'NVIDIA DGX Cloud Hub (Santa Clara)', operator: 'NVIDIA', lat: 37.35, lon: -121.95, status: 'Operational', powerMW: 120, estGPUs: 27000, co2Tons: 35000, models: ['NIM services', 'Llama', 'Nemotron'], cooling: 'Advanced liquid racks', waterRisk: 'Low', gridRisk: 'Medium', jobs: '210 / 560', role: 'Reference AI platform and partner enablement.' },
+  { id: 'xai-1', name: 'xAI Colossus (Memphis)', operator: 'XAI', lat: 35.15, lon: -90.05, status: 'Operational', powerMW: 260, estGPUs: 100000, co2Tons: 92000, models: ['Grok family'], cooling: 'Containerized liquid + air hybrid', waterRisk: 'Medium', gridRisk: 'High', jobs: '340 / 1000', role: 'Fast-iteration frontier model training site.' },
 
-  { id: 'cn-1', name: 'Alibaba Zhangbei Cluster', operator: 'CHINA', lat: 41.15, lon: 114.7, status: 'Operational', powerMW: 390, models: ['Qwen family', 'Industry LLMs'], cooling: 'Air + direct liquid pilots', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '620 / 1800', role: 'Large-scale domestic foundation model hosting.' },
-  { id: 'cn-2', name: 'Tencent Qingyuan Cluster', operator: 'CHINA', lat: 23.68, lon: 113.06, status: 'Operational', powerMW: 320, models: ['Hunyuan family', 'Multimodal assistants'], cooling: 'Hybrid chilled water', waterRisk: 'High', gridRisk: 'Medium', jobs: '520 / 1500', role: 'South China inference and AI cloud serving.' },
-  { id: 'cn-3', name: 'Baidu Yangquan AI DC', operator: 'CHINA', lat: 37.86, lon: 113.58, status: 'Expansion', powerMW: 280, models: ['ERNIE family', 'Autonomous driving models'], cooling: 'Free-air + liquid assist', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '430 / 1300', role: 'Search + autonomous AI workloads.' },
-  { id: 'cn-4', name: 'Huawei Guizhou Region', operator: 'CHINA', lat: 26.65, lon: 106.63, status: 'Operational', powerMW: 340, models: ['Pangu family', 'Enterprise copilot models'], cooling: 'Low-ambient optimized', waterRisk: 'Medium', gridRisk: 'Low', jobs: '570 / 1700', role: 'Domestic enterprise model platform backend.' },
-  { id: 'cn-5', name: 'ByteDance Ulanqab Hub', operator: 'CHINA', lat: 41.03, lon: 113.12, status: 'Expansion', powerMW: 300, models: ['Recommendation + video generation models'], cooling: 'Air + liquid retrofit', waterRisk: 'Low', gridRisk: 'Medium', jobs: '480 / 1400', role: 'Massive recommender and media model infrastructure.' }
+  { id: 'cn-1', name: 'Alibaba Zhangbei Cluster', operator: 'CHINA', lat: 41.15, lon: 114.7, status: 'Operational', powerMW: 390, estGPUs: 89000, co2Tons: 155000, models: ['Qwen family', 'Industry LLMs'], cooling: 'Air + direct liquid pilots', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '620 / 1800', role: 'Large-scale domestic foundation model hosting.' },
+  { id: 'cn-2', name: 'Tencent Qingyuan Cluster', operator: 'CHINA', lat: 23.68, lon: 113.06, status: 'Operational', powerMW: 320, estGPUs: 73000, co2Tons: 135000, models: ['Hunyuan family', 'Multimodal assistants'], cooling: 'Hybrid chilled water', waterRisk: 'High', gridRisk: 'Medium', jobs: '520 / 1500', role: 'South China inference and AI cloud serving.' },
+  { id: 'cn-3', name: 'Baidu Yangquan AI DC', operator: 'CHINA', lat: 37.86, lon: 113.58, status: 'Expansion', powerMW: 280, estGPUs: 64000, co2Tons: 110000, models: ['ERNIE family', 'Autonomous driving models'], cooling: 'Free-air + liquid assist', waterRisk: 'Medium', gridRisk: 'Medium', jobs: '430 / 1300', role: 'Search + autonomous AI workloads.' },
+  { id: 'cn-4', name: 'Huawei Guizhou Region', operator: 'CHINA', lat: 26.65, lon: 106.63, status: 'Operational', powerMW: 340, estGPUs: 77000, co2Tons: 15000, models: ['Pangu family', 'Enterprise copilot models'], cooling: 'Low-ambient optimized', waterRisk: 'Medium', gridRisk: 'Low', jobs: '570 / 1700', role: 'Domestic enterprise model platform backend.' },
+  { id: 'cn-5', name: 'ByteDance Ulanqab Hub', operator: 'CHINA', lat: 41.03, lon: 113.12, status: 'Expansion', powerMW: 300, estGPUs: 68000, co2Tons: 115000, models: ['Recommendation + video generation models'], cooling: 'Air + liquid retrofit', waterRisk: 'Low', gridRisk: 'Medium', jobs: '480 / 1400', role: 'Massive recommender and media model infrastructure.' }
 ];
 
 const CENTER_ONLINE_YEAR = {
@@ -469,10 +424,12 @@ function centerDetailsHtml(center) {
     `<div><b>Operator:</b> ${center.operator}</div>`,
     `<div><b>Status:</b> ${center.status}</div>`,
     `<div><b>Estimated Power:</b> ${center.powerMW} MW</div>`,
+    `<div><b>Estimated Capacity:</b> ${center.estGPUs.toLocaleString()} GPUs</div>`,
     `<div><b>Role:</b> ${center.role}</div>`,
     `<div style="margin-top:8px;"><b>Model Coverage (Likely):</b></div>`,
     `<div>${modelTags || 'No model details available.'}</div>`,
-    `<div style="margin-top:8px;"><b>Impact Breakdown:</b></div>`,
+    `<div style="margin-top:8px;"><b>Environmental Impact:</b></div>`,
+    `<div>Annual CO2 Output: <span style="color:#ff8787;">${center.co2Tons.toLocaleString()} Tons</span></div>`,
     `<div>Cooling: ${center.cooling}</div>`,
     `<div>Water Stress: ${center.waterRisk}</div>`,
     `<div>Grid Carbon Pressure: ${center.gridRisk}</div>`,
@@ -802,7 +759,6 @@ window.renderKbArticle = function(key) {
     artEl.innerHTML = `<b>${article.title}</b><br><br>${article.content}`;
   }
 };
-
 
 function renderCenterList(query = '') {
   const q = query.trim().toLowerCase();
@@ -1140,3 +1096,48 @@ function animate() {
 }
 
 animate();
+
+const TIMELINE = [
+  { year: 2019, phase: 'PRE-BOOM', desc: 'AI spend is meaningful but still niche. Capex and debt loads are manageable; utilization is variable.' },
+  { year: 2020, phase: 'DIGITAL ACCELERATION', desc: 'Pandemic demand accelerates cloud migration. GPU demand starts outpacing supply in key regions.' },
+  { year: 2021, phase: 'SCALE-UP', desc: 'Large model training budgets rise sharply; infrastructure commitments lock in multiyear power contracts.' },
+  { year: 2022, phase: 'GEN-AI INFLECTION', desc: 'Public launch moment. Capital markets reward growth; debt-backed expansion becomes easier to justify.' },
+  { year: 2023, phase: 'GPU SCRAMBLE', desc: 'Datacenter retrofits, colocation GPU deals, and leasing premiums spike. Execution risk rises.' },
+  { year: 2024, phase: 'HYPERSCALE CAPEX CYCLE', desc: 'Massive AI capex wave. Narrative shifts from capability race to monetization pressure.' },
+  { year: 2025, phase: 'MONETIZATION TEST', desc: 'Revenue per token and enterprise conversion rates become key. Weak utilization starts hurting margins.' },
+  { year: 2026, phase: 'DEBT REPRICING WINDOW', desc: 'Refinancing and power-cost sensitivity matter more. Operators with low coverage ratios face stress.' },
+  { year: 2027, phase: 'CONSOLIDATION RISK', desc: 'If demand growth slows, overbuilt clusters and idle accelerators can force write-downs.' },
+  { year: 2028, phase: 'EFFICIENCY WARS', desc: 'Model compression and inference efficiency reduce spend per output; weaker facilities struggle to stay full.' },
+  { year: 2029, phase: 'RESET OR RE-ACCELERATION', desc: 'Market bifurcates: high-utilization operators compound, over-levered players cut capex aggressively.' },
+  { year: 2030, phase: 'NEW BASELINE', desc: 'AI infrastructure matures into utility-like economics for winners; debt discipline decides survivorship.' }
+];
+
+const TIMELINE_METRICS = [
+  { year: 2019, capex: 18, debt: 22, bubble: 16, util: 74, powerInflation: 2, growth: 9, rateShock: 0.1 },
+  { year: 2020, capex: 23, debt: 27, bubble: 20, util: 77, powerInflation: 4, growth: 14, rateShock: 0.2 },
+  { year: 2021, capex: 31, debt: 34, bubble: 27, util: 81, powerInflation: 7, growth: 18, rateShock: 0.4 },
+  { year: 2022, capex: 43, debt: 48, bubble: 39, util: 86, powerInflation: 10, growth: 28, rateShock: 0.8 },
+  { year: 2023, capex: 57, debt: 64, bubble: 53, util: 88, powerInflation: 16, growth: 31, rateShock: 1.2 },
+  { year: 2024, capex: 71, debt: 79, bubble: 62, util: 85, powerInflation: 18, growth: 24, rateShock: 1.5 },
+  { year: 2025, capex: 83, debt: 94, bubble: 67, util: 79, powerInflation: 22, growth: 17, rateShock: 2.0 },
+  { year: 2026, capex: 88, debt: 107, bubble: 73, util: 73, powerInflation: 27, growth: 10, rateShock: 2.6 },
+  { year: 2027, capex: 82, debt: 112, bubble: 78, util: 68, powerInflation: 33, growth: 6, rateShock: 3.1 },
+  { year: 2028, capex: 74, debt: 110, bubble: 70, util: 71, powerInflation: 25, growth: 9, rateShock: 2.4 },
+  { year: 2029, capex: 69, debt: 104, bubble: 64, util: 75, powerInflation: 19, growth: 12, rateShock: 1.8 },
+  { year: 2030, capex: 66, debt: 98, bubble: 58, util: 78, powerInflation: 14, growth: 14, rateShock: 1.2 }
+];
+
+const TIMELINE_DEEP_DIVE = {
+  2019: { driver: 'EARLY FOUNDATION MODEL EXPERIMENTS', debt: 'BALANCE SHEETS STILL FLEXIBLE', trigger: 'GPU PRICES OUTPACE CUSTOMER VALUE', response: 'KEEP SPEND DISCIPLINED' },
+  2020: { driver: 'PANDEMIC DIGITAL DEMAND SHOCK', debt: 'CHEAP CREDIT SUPPORTS CAPEX', trigger: 'DEMAND NORMALIZATION', response: 'LOCK LONG-TERM CONTRACTS CAUTIOUSLY' },
+  2021: { driver: 'MULTI-CLOUD ENTERPRISE UPTAKE', debt: 'DEBT BUILDING BUT COVERED', trigger: 'CLOUD PRICE COMPRESSION', response: 'PRIORITIZE HIGH-MARGIN USE CASES' },
+  2022: { driver: 'GEN-AI PRODUCT BREAKOUT', debt: 'CAPEX COMMITMENTS ACCELERATE', trigger: "USAGE DOESN'T CONVERT TO REVENUE", response: 'TIGHTEN UNIT ECONOMICS' },
+  2023: { driver: 'GPU SUPPLY SCRAMBLE', debt: 'LEASE + FINANCING STACK EXPANDS', trigger: 'IDLE CAPACITY POST-BUYING WAVE', response: 'SHIFT TO FLEXIBLE CAPACITY' },
+  2024: { driver: 'HYPERSCALE ARMS RACE', debt: 'LARGE MATURITY WALL FORMING', trigger: 'RATE STAYS HIGHER FOR LONGER', response: 'DE-LAYER CAPEX PRIORITIES' },
+  2025: { driver: 'ROI PRESSURE FROM INVESTORS', debt: 'INTEREST COVERAGE STARTS FRAGILE FOR SOME', trigger: 'TOKEN PRICING DETERIORATION', response: 'FOCUS ON PROFITABLE VERTICALS' },
+  2026: { driver: 'REFINANCING WINDOW OPENS', debt: 'ROLLING DEBT COSTS STEP UP', trigger: 'UTILIZATION < 70%', response: 'CAPEX CUTS + CONSOLIDATION' },
+  2027: { driver: 'EFFICIENCY MODELS REDUCE DEMAND PER TOKEN', debt: 'LEGACY ASSETS RISK STRANDING', trigger: 'WRITE-DOWNS ON OLD CLUSTERS', response: 'RETIRE LOW-EFFICIENCY FLEETS' },
+  2028: { driver: 'PLATFORM CONSOLIDATION', debt: 'SURVIVORS IMPROVE COVERAGE', trigger: 'POWER SUPPLY SHOCK', response: 'GEOGRAPHIC LOAD BALANCING' },
+  2029: { driver: 'MARKET REPRICING', debt: 'DEBT METRICS STABILIZE FOR WINNERS', trigger: 'SECOND DEMAND SLOWDOWN', response: 'ASSET-LIGHT EXPANSION' },
+  2030: { driver: 'UTILITY-LIKE AI INFRA MODEL', debt: 'DISCIPLINED CAPITAL RETURNS', trigger: 'POLICY/GRID CONSTRAINTS', response: 'LONG-HORIZON CAPACITY PLANNING' }
+};
